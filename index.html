@@ -29,15 +29,16 @@
             text-align: center;
             margin-bottom: 4px;
             display: flex;
-            align-items: flex-end;
+            align-items: baseline;
             justify-content: center;
-            gap: 0;
+            gap: 2px;
         }
 
         .logo-h {
             position: relative;
-            width: 28px;
-            height: 52px;
+            width: 24px;
+            height: 40px;
+            margin-bottom: -3px;
         }
 
         .logo-text {
@@ -45,7 +46,6 @@
             font-size: 1.2rem;
             font-weight: 400;
             line-height: 1;
-            margin-bottom: 2px;
         }
 
         .subtitle {
@@ -136,6 +136,50 @@
         .unit-toggle button.active {
             background: #fff;
             color: #000;
+        }
+
+        .spacing-options {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #333;
+        }
+
+        .spacing-options label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .spacing-toggle {
+            display: flex;
+            background: #000;
+            padding: 0;
+            margin-bottom: 12px;
+            border: 1px solid #333;
+        }
+
+        .spacing-toggle button {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 400;
+            color: #666;
+            font-family: inherit;
+            font-size: 0.85rem;
+        }
+
+        .spacing-toggle button.active {
+            background: #fff;
+            color: #000;
+        }
+
+        .custom-spacing-input {
+            display: none;
+        }
+
+        .custom-spacing-input.visible {
+            display: block;
         }
 
         .btn {
@@ -461,25 +505,26 @@
     <div class="container">
         <div class="logo">
             <div class="logo-h">
-                <svg viewBox="0 0 28 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Lowercase h with tape measure -->
-                    <!-- Left vertical stroke (tall, with tape extending up) -->
-                    <rect x="2" y="18" width="4" height="22" fill="white"/>
-                    <!-- Tape extending upward from left stroke -->
-                    <rect x="2" y="0" width="4" height="18" fill="white"/>
-                    <!-- Tape measure marks on left side -->
-                    <rect x="0" y="2" width="2" height="1" fill="white"/>
-                    <rect x="0" y="6" width="1" height="1" fill="white"/>
-                    <rect x="0" y="10" width="2" height="1" fill="white"/>
-                    <rect x="0" y="14" width="1" height="1" fill="white"/>
-                    <!-- Hook at top of tape -->
-                    <rect x="0" y="0" width="6" height="2" fill="white"/>
-                    <!-- Arch/hump of lowercase h -->
-                    <rect x="6" y="26" width="4" height="4" fill="white"/>
-                    <rect x="10" y="24" width="4" height="4" fill="white"/>
-                    <rect x="14" y="22" width="4" height="4" fill="white"/>
-                    <!-- Right vertical stroke (short) -->
-                    <rect x="18" y="26" width="4" height="14" fill="white"/>
+                <svg viewBox="0 0 24 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Tape measure: tape extending upward -->
+                    <rect x="3" y="0" width="4" height="20" fill="white"/>
+                    <!-- Tick marks on tape -->
+                    <rect x="7" y="2" width="3" height="1" fill="white"/>
+                    <rect x="7" y="5" width="2" height="1" fill="white"/>
+                    <rect x="7" y="8" width="3" height="1" fill="white"/>
+                    <rect x="7" y="11" width="2" height="1" fill="white"/>
+                    <rect x="7" y="14" width="3" height="1" fill="white"/>
+                    <rect x="7" y="17" width="2" height="1" fill="white"/>
+                    <!-- Hook at top -->
+                    <rect x="2" y="0" width="6" height="2" fill="white"/>
+                    <!-- Tape measure body (forms bottom of h) -->
+                    <rect x="0" y="18" width="10" height="10" fill="white"/>
+                    <!-- h arch connection -->
+                    <rect x="10" y="22" width="4" height="3" fill="white"/>
+                    <!-- h right leg -->
+                    <rect x="14" y="22" width="4" height="18" fill="white"/>
+                    <!-- h left leg extension -->
+                    <rect x="3" y="28" width="4" height="12" fill="white"/>
                 </svg>
             </div>
             <span class="logo-text">angar</span>
@@ -507,6 +552,20 @@
                 <div class="input-field">
                     <label>Wall Height <span class="optional-tag">(optional)</span></label>
                     <input type="text" id="wallHeight" placeholder="e.g., 96 or 8 ft">
+                </div>
+            </div>
+
+            <div class="spacing-options" id="spacingOptions">
+                <label>Spacing Mode (for multiple pieces)</label>
+                <div class="spacing-toggle">
+                    <button class="active" id="spacingEven" onclick="setSpacingMode('even')">Evenly Spaced</button>
+                    <button id="spacingCustom" onclick="setSpacingMode('custom')">Custom Spacing</button>
+                </div>
+                <div class="custom-spacing-input" id="customSpacingInput">
+                    <div class="input-field">
+                        <label>Space Between Pieces</label>
+                        <input type="text" id="customSpacing" placeholder="e.g., 6 or 6 1/2">
+                    </div>
                 </div>
             </div>
         </div>
@@ -545,7 +604,15 @@
         let currentUnit = 'inches';
         let pieceCount = 1;
         let pieces = [];
+        let spacingMode = 'even'; // 'even' or 'custom'
         const CM_PER_INCH = 2.54;
+
+        function setSpacingMode(mode) {
+            spacingMode = mode;
+            document.getElementById('spacingEven').classList.toggle('active', mode === 'even');
+            document.getElementById('spacingCustom').classList.toggle('active', mode === 'custom');
+            document.getElementById('customSpacingInput').classList.toggle('visible', mode === 'custom');
+        }
 
         function parseMixedNumber(str) {
             if (!str || str.trim() === '') return NaN;
@@ -787,20 +854,47 @@
             const centerHeight = pieces.length > 0 ? pieces[0].centerHeight : 60;
 
             const totalPiecesWidth = pieces.reduce((sum, p) => sum + p.width, 0);
-            const spacing = pieces.length > 1 ? 12 : 0;
-            const totalWidth = totalPiecesWidth + spacing * (pieces.length - 1);
 
             const diagramWidth = diagram.offsetWidth || 600;
             const diagramHeight = 450;
 
             const effectiveWallHeight = wallHeightIn || 96;
-            const effectiveWallWidth = wallWidthIn || Math.max(totalWidth + 40, 80);
+
+            // Calculate spacing based on mode
+            let spacing = 0;
+            let effectiveWallWidth;
+
+            if (pieces.length > 1) {
+                if (spacingMode === 'custom') {
+                    // Custom spacing mode
+                    const customSpacingValue = parseMixedNumber(document.getElementById('customSpacing').value);
+                    spacing = isNaN(customSpacingValue) ? 12 : toInches(customSpacingValue);
+                    effectiveWallWidth = wallWidthIn || Math.max(totalPiecesWidth + spacing * (pieces.length - 1) + 40, 80);
+                } else {
+                    // Even spacing mode - distribute pieces evenly across wall
+                    effectiveWallWidth = wallWidthIn || Math.max(totalPiecesWidth + 60, 120);
+                    // Calculate spacing to evenly distribute: wall width minus all pieces, divided by (number of gaps + 2 edges)
+                    const availableSpace = effectiveWallWidth - totalPiecesWidth;
+                    spacing = availableSpace / (pieces.length + 1);
+                }
+            } else {
+                effectiveWallWidth = wallWidthIn || Math.max(totalPiecesWidth + 40, 80);
+            }
+
+            const totalWidth = totalPiecesWidth + spacing * (pieces.length - 1);
 
             const scaleY = (diagramHeight - 20) / effectiveWallHeight;
             const scaleX = (diagramWidth - 40) / effectiveWallWidth;
             const scale = Math.min(scaleX, scaleY);
 
-            let currentX = (diagramWidth - (totalWidth * scale)) / 2;
+            // Calculate starting X position based on spacing mode
+            let currentX;
+            if (pieces.length > 1 && spacingMode === 'even') {
+                // For even spacing, start after the first edge gap
+                currentX = (diagramWidth - (effectiveWallWidth * scale)) / 2 + (spacing * scale);
+            } else {
+                currentX = (diagramWidth - (totalWidth * scale)) / 2;
+            }
 
             // Add center height reference line (dotted)
             const centerHeightY = diagramHeight - (centerHeight * scale);
