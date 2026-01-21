@@ -1061,6 +1061,18 @@
                             <p class="help-text">Top of piece to bottom of cleat</p>
                         </div>
                     </div>
+                    <div class="input-row">
+                        <div class="input-field">
+                            <label>Cleat Width</label>
+                            <input type="text" class="dimension-input" data-piece="${pieceId}" data-field="cleatWidth" placeholder="e.g., 12">
+                            <p class="help-text">Width of each cleat</p>
+                        </div>
+                        <div class="input-field">
+                            <label>Cleat Height</label>
+                            <input type="text" class="dimension-input" data-piece="${pieceId}" data-field="cleatHeight" placeholder="e.g., 3">
+                            <p class="help-text">Height/thickness of cleat</p>
+                        </div>
+                    </div>
                 `;
             }
         }
@@ -1146,7 +1158,7 @@
                 const heightIn = toInches(height);
                 const fromTopIn = toInches(fromTop);
 
-                let spanIn, nailHeight, wireSag = 0, cleatCount = 1, cleatPositions = [];
+                let spanIn, nailHeight, wireSag = 0, cleatCount = 1, cleatPositions = [], cleatWidthIn = 12, cleatHeightIn = 3;
 
                 if (hardwareType === 'nails') {
                     const span = parseMixedNumber(card.querySelector(`[data-field="span"]`).value);
@@ -1203,6 +1215,12 @@
                     }
                     cleatCount = Math.round(cleatCountVal);
 
+                    // Get cleat dimensions (with defaults)
+                    const cleatWidthVal = parseMixedNumber(card.querySelector(`[data-field="cleatWidth"]`)?.value);
+                    const cleatHeightVal = parseMixedNumber(card.querySelector(`[data-field="cleatHeight"]`)?.value);
+                    cleatWidthIn = !isNaN(cleatWidthVal) ? toInches(cleatWidthVal) : 12;
+                    cleatHeightIn = !isNaN(cleatHeightVal) ? toInches(cleatHeightVal) : 3;
+
                     // For cleats, span represents the total spread of cleats
                     // Cleats are evenly spaced from center
                     // Use 60% of width as the total cleat spread
@@ -1234,7 +1252,9 @@
                     hardwareType: hardwareType,
                     wireSag: wireSag,
                     cleatCount: cleatCount,
-                    cleatPositions: cleatPositions
+                    cleatPositions: cleatPositions,
+                    cleatWidth: cleatWidthIn,
+                    cleatHeight: cleatHeightIn
                 });
             });
 
@@ -1346,20 +1366,18 @@
                         <div class="piece-card">
                             <h3>Piece ${piece.index}</h3>
                             <div class="result-item">
-                                <h3>Nail Height from Floor</h3>
+                                <h3>Hook Height from Floor</h3>
                                 <div class="result-value">${formatResult(piece.nailHeight)}</div>
-                                <div class="note">Single nail at center of piece</div>
+                                <div class="note">Two hooks at this height (wire sag: ${formatResult(piece.wireSag)})</div>
                             </div>
                             <div class="input-row">
                                 <div class="result-item" style="flex:1">
-                                    <h3>Calculated Span</h3>
+                                    <h3>Distance Between Hooks</h3>
                                     <div class="result-value">${formatResult(piece.span)}</div>
-                                    <div class="note">60% of width</div>
                                 </div>
                                 <div class="result-item" style="flex:1">
-                                    <h3>Wire Sag</h3>
-                                    <div class="result-value">${formatResult(piece.wireSag)}</div>
-                                    <div class="note">Wire drop from nail</div>
+                                    <h3>Each Hook from Center</h3>
+                                    <div class="result-value">${formatResult(piece.span / 2)}</div>
                                 </div>
                             </div>
                         </div>
@@ -1379,7 +1397,7 @@
                             <div class="result-item">
                                 <h3>Cleat Height from Floor</h3>
                                 <div class="result-value">${formatResult(piece.nailHeight)}</div>
-                                <div class="note">Top edge of wall cleat</div>
+                                <div class="note">Bottom edge of wall cleat (${formatResult(piece.cleatWidth)} x ${formatResult(piece.cleatHeight)})</div>
                             </div>
                             <div class="input-row">
                                 <div class="result-item" style="flex:1">
@@ -1551,53 +1569,76 @@
 
                 // Draw hardware based on type
                 if (piece.hardwareType === 'wire') {
-                    // WIRE: Single nail at center with wire visualization
+                    // WIRE: Two hooks with wire visualization
 
-                    // Draw wire (curved line showing sag)
+                    // Draw wire (curved line showing sag between hooks)
                     const wireAttachY = picTop + (piece.fromTop * drawScale);
-                    const wireSagY = wireAttachY - (piece.wireSag * drawScale);
 
                     ctx.strokeStyle = '#888';
                     ctx.lineWidth = 2;
                     ctx.beginPath();
                     ctx.moveTo(nail1X, wireAttachY);
-                    ctx.quadraticCurveTo(picCenterX, wireSagY + 10, nail2X, wireAttachY);
+                    ctx.lineTo(nail1X, nailY);
+                    ctx.quadraticCurveTo(picCenterX, nailY + (piece.wireSag * drawScale * 0.3), nail2X, nailY);
+                    ctx.lineTo(nail2X, wireAttachY);
                     ctx.stroke();
 
-                    // Single nail at center
+                    // Dotted line connecting hooks
+                    ctx.strokeStyle = '#f00';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([4, 4]);
+                    ctx.beginPath();
+                    ctx.moveTo(nail1X + circleRadius, nailY);
+                    ctx.lineTo(nail2X - circleRadius, nailY);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+
+                    // Span label between hooks
+                    const spanLabelX = (nail1X + nail2X) / 2;
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(spanLabelX - 26, nailY - 20, 52, 14);
+                    ctx.fillStyle = '#0f0';
+                    ctx.font = 'bold 11px monospace';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(formatResult(piece.span), spanLabelX, nailY - 12);
+
+                    // Left hook - red circle with X
                     ctx.strokeStyle = '#f00';
                     ctx.lineWidth = 2;
                     ctx.beginPath();
-                    ctx.arc(picCenterX, nailY, circleRadius, 0, Math.PI * 2);
+                    ctx.arc(nail1X, nailY, circleRadius, 0, Math.PI * 2);
                     ctx.stroke();
                     ctx.beginPath();
-                    ctx.moveTo(picCenterX - xSize, nailY - xSize);
-                    ctx.lineTo(picCenterX + xSize, nailY + xSize);
-                    ctx.moveTo(picCenterX + xSize, nailY - xSize);
-                    ctx.lineTo(picCenterX - xSize, nailY + xSize);
+                    ctx.moveTo(nail1X - xSize, nailY - xSize);
+                    ctx.lineTo(nail1X + xSize, nailY + xSize);
+                    ctx.moveTo(nail1X + xSize, nailY - xSize);
+                    ctx.lineTo(nail1X - xSize, nailY + xSize);
                     ctx.stroke();
 
-                    // Wire sag label
-                    ctx.fillStyle = '#000';
-                    ctx.fillRect(picCenterX - 30, nailY - 25, 60, 14);
-                    ctx.fillStyle = '#0f0';
-                    ctx.font = 'bold 10px monospace';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText('sag: ' + formatResult(piece.wireSag), picCenterX, nailY - 17);
+                    // Right hook - red circle with X
+                    ctx.beginPath();
+                    ctx.arc(nail2X, nailY, circleRadius, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(nail2X - xSize, nailY - xSize);
+                    ctx.lineTo(nail2X + xSize, nailY + xSize);
+                    ctx.moveTo(nail2X + xSize, nailY - xSize);
+                    ctx.lineTo(nail2X - xSize, nailY + xSize);
+                    ctx.stroke();
 
                     // Store hitbox
                     nailHitboxes.push({
-                        x1: picCenterX - circleRadius,
-                        x2: picCenterX + circleRadius,
+                        x1: nail1X,
+                        x2: nail2X,
                         y: nailY,
-                        span: 0
+                        span: piece.span
                     });
 
                 } else if (piece.hardwareType === 'cleat') {
                     // CLEAT: Multiple cleat positions shown as rectangles
-                    const cleatWidth = 16;
-                    const cleatHeight = 6;
+                    const cleatWidth = piece.cleatWidth * drawScale;
+                    const cleatHeight = piece.cleatHeight * drawScale;
 
                     piece.cleatPositions.forEach((pos, idx) => {
                         const cleatX = picCenterX + (pos * drawScale);
@@ -1713,9 +1754,7 @@
                 // In hardware-only mode, show distance from left wall to first hardware point
                 if (viewMode === 'nails') {
                     let firstHwX = nail1X;
-                    if (piece.hardwareType === 'wire') {
-                        firstHwX = picCenterX;
-                    } else if (piece.hardwareType === 'cleat' && piece.cleatPositions.length > 0) {
+                    if (piece.hardwareType === 'cleat' && piece.cleatPositions.length > 0) {
                         firstHwX = picCenterX + (piece.cleatPositions[0] * drawScale);
                     }
 
@@ -2061,6 +2100,11 @@
                 const pieceCards = document.querySelectorAll('.piece-card');
                 // 3 cleats
                 fillPieceValues(pieceCards[0], '36', '24', '3', '2');
+                // Fill cleat dimensions
+                const cleatWidthField = pieceCards[0].querySelector('[data-field="cleatWidth"]');
+                const cleatHeightField = pieceCards[0].querySelector('[data-field="cleatHeight"]');
+                if (cleatWidthField) cleatWidthField.value = '18';
+                if (cleatHeightField) cleatHeightField.value = '3';
                 document.getElementById('debugMenu').classList.remove('open');
                 calculate();
             }, 50);
