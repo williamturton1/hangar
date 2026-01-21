@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hangar Logo Options</title>
+    <style>
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'SF Mono', monospace;
+            padding: 40px;
+        }
+        .logo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .logo-option {
+            background: #111;
+            padding: 30px;
+            border: 1px solid #333;
+            text-align: center;
+        }
+        .logo-option h3 {
+            margin: 0 0 20px 0;
+            color: #666;
+            font-size: 0.8rem;
+        }
+        .logo-display {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 2px;
+            margin-bottom: 10px;
+        }
+        .logo-display svg {
+            width: 40px;
+            height: auto;
+        }
+        .logo-text {
+            font-size: 1.4rem;
+            color: #fff;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-weight: 400;
+        }
+        .current {
+            border-color: #0f0;
+        }
+        .current h3 {
+            color: #0f0;
+        }
+    </style>
+</head>
+<body>
+    <h1>hangar logo options</h1>
+    <div class="logo-grid">
+
+        <!-- Option 1: Current -->
+        <div class="logo-option current">
+            <h3>1. Current (Tape Measure)</h3>
+            <div class="logo-display">
+                <svg viewBox="0 0 28 44" fill="none">
+                    <rect x="5" y="0" width="5" height="2" fill="white"/>
+                    <rect x="4" y="2" width="2" height="2" fill="white"/>
+                    <rect x="6" y="2" width="4" height="18" fill="white"/>
+                    <rect x="10" y="4" width="4" height="1" fill="white"/>
+                    <rect x="10" y="7" width="2" height="1" fill="white"/>
+                    <rect x="10" y="10" width="4" height="1" fill="white"/>
+                    <rect x="10" y="13" width="2" height="1" fill="white"/>
+                    <rect x="10" y="16" width="4" height="1" fill="white"/>
+                    <rect x="0" y="20" width="14" height="12" fill="white"/>
+                    <rect x="5" y="20" width="6" height="2" fill="black"/>
+                    <rect x="5" y="24" width="4" height="4" fill="black"/>
+                    <rect x="14" y="26" width="4" height="3" fill="white"/>
+                    <rect x="18" y="26" width="4" height="18" fill="white"/>
+                    <rect x="4" y="32" width="6" height="12" fill="white"/>
+                </svg>
+                <span class="logo-text">angar</span>
+            </div>
+        </div>
+
+        <!-- Option 2: Nail Hook H -->
+        <div class="logo-option">
+            <h3>2. Nail Hook</h3>
+            <div class="logo-display">
+                <svg viewBox="0 0 24 44" fill="none">
+                    <!-- Left stem with nail head -->
+                    <rect x="2" y="0" width="6" height="3" fill="white"/>
+                    <rect x="3" y="3" width="4" height="41" fill="white"/>
+                    <!-- Crossbar -->
+                    <rect x="7" y="22" width="10" height="4" fill="white"/>
+                    <!-- Right stem -->
+                    <rect x="17" y="22" width="4" height="22" fill="white"/>
+                </svg>
+                <span class="logo-text">angar</span>
+            </div>
+        </div>
+
+        <!-- Option 3: Frame Corners -->
+        <div class="logo-option">
+            <h3>3. Frame Corner</h3>
+            <div class="logo-display">
+                <svg viewBox="0 0 28 44" fill="none">
+                    <!-- Outer frame corner -->
+                    <rect x="0" y="0" width="4" height="44" fill="white"/>
+                    <rect x="0" y="0" width="20" height="4" fill="white"/>
+                    <!-- Inner cutout to make L shape -->
+                    <rect x="4" y="4" width="16" height="40" fill="black"/>
+                    <!-- H crossbar -->
+                    <rect x="4" y="20" width="16" height="4" fill="white"/>
+                    <!-- Right leg -->
+                    <rect x="16" y="20" width="4" height="24" fill="white"/>
+                </svg>
+                <span class="logo-text">angar</span>
+            </div>
+        </div>
+
+        <!-- Option 4: Level Bubble -->
+        <div class="logo-option">
+            <h3>4. Level H</h3>
+            <div class="logo-display">
+                <svg viewBox="0 0 28 44" fill="none">
+                    <!-- Left stem -->
+                    <rect x="2" y="0" width="4" height="44" fill="white"/>
+                    <!-- Crossbar with level vial -->
+                    <rect x="6" y="18" width="16" height="8" fill="white"/>
+                    <!-- Level vial window -->
+                    <rect x="9" y="20" width="10" height="4" fill="black"/>
+                    <!-- Bubble -->
+                    <circle cx="14" cy="22" r="1.5" fill="#0f0"/>
+                    <!-- Right stem -->
+                    <rect x="22" y="18" width="4" height="26" fill="white"/>
+                </svg>
+                <span class="logo-text">angar</span>
+            </div>
+        </div>
+
+        <!-- Option 5: Minimal Tape -->
+        <div class="logo-option">
+            <h3>5. Minimal Tape</h3>
+            <div class="logo-display">
+                <svg viewBox="0 0 26 44" fill="none">
+                    <!-- Tape extending up -->
+                    <rect x="4" y="0" width="3" height="20" fill="white"/>
+                    <!-- Tick marks -->
+                    <rect x="7" y="2" width="3" height="1" fill="white"/>
+                    <rect x="7" y="6" width="2" height="1" fill="white"/>
+                    <rect x="7" y="10" width="3" height="1" fill="white"/>
+                    <rect x="7" y="14" width="2" height="1" fill="white"/>
+                    <!-- Housing (rounded look with rects) -->
+                    <rect x="0" y="20" width="12" height="10" fill="white"/>
+                    <rect x="4" y="20" width="4" height="2" fill="black"/>
+                    <!-- H connection -->
+                    <rect x="12" y="24" width="4" height="3" fill="white"/>
+                    <!-- Right leg -->
+                    <rect x="16" y="24" width="3" height="20" fill="white"/>
+                    <!-- Left leg continues from housing -->
+                    <rect x="3" y="30" width="4" height="14" fill="white"/>
+                </svg>
+                <span class="logo-text">angar</span>
+            </div>
+        </div>
+
+        <!-- Option 6: Picture Wire H -->
+        <div class="logo-option">
+            <h3>6. Wire & Hooks</h3>
+            <div class="logo-display">
+                <svg viewBox="0 0 28 44" fill="none">
+                    <!-- Left hook -->
+                    <path d="M4 0 L4 8 Q4 12 8 12" stroke="white" stroke-width="3" fill="none"/>
+                    <!-- Left stem -->
+                    <rect x="2" y="10" width="4" height="34" fill="white"/>
+                    <!-- Wire across (curved) -->
+                    <path d="M6 24 Q14 32 22 24" stroke="white" stroke-width="2" fill="none"/>
+                    <!-- Right hook -->
+                    <path d="M24 0 L24 8 Q24 12 20 12" stroke="white" stroke-width="3" fill="none"/>
+                    <!-- Right stem -->
+                    <rect x="22" y="10" width="4" height="34" fill="white"/>
+                </svg>
+                <span class="logo-text">angar</span>
+            </div>
+        </div>
+
+        <!-- Option 7: Bold Industrial -->
+        <div class="logo-option">
+            <h3>7. Bold Industrial</h3>
+            <div class="logo-display">
+                <svg viewBox="0 0 28 44" fill="none">
+                    <!-- Heavy left stem -->
+                    <rect x="0" y="0" width="8" height="44" fill="white"/>
+                    <!-- Heavy crossbar -->
+                    <rect x="8" y="18" width="12" height="8" fill="white"/>
+                    <!-- Heavy right stem -->
+                    <rect x="20" y="18" width="8" height="26" fill="white"/>
+                </svg>
+                <span class="logo-text">angar</span>
+            </div>
+        </div>
+
+        <!-- Option 8: Ruler Marks -->
+        <div class="logo-option">
+            <h3>8. Ruler H</h3>
+            <div class="logo-display">
+                <svg viewBox="0 0 28 44" fill="none">
+                    <!-- Left stem (ruler) -->
+                    <rect x="2" y="0" width="6" height="44" fill="white"/>
+                    <!-- Ruler marks on left -->
+                    <rect x="2" y="4" width="3" height="1" fill="black"/>
+                    <rect x="2" y="10" width="4" height="1" fill="black"/>
+                    <rect x="2" y="16" width="3" height="1" fill="black"/>
+                    <rect x="2" y="28" width="3" height="1" fill="black"/>
+                    <rect x="2" y="34" width="4" height="1" fill="black"/>
+                    <rect x="2" y="40" width="3" height="1" fill="black"/>
+                    <!-- Crossbar -->
+                    <rect x="8" y="20" width="12" height="4" fill="white"/>
+                    <!-- Right stem -->
+                    <rect x="20" y="20" width="6" height="24" fill="white"/>
+                    <!-- Ruler marks on right -->
+                    <rect x="23" y="26" width="3" height="1" fill="black"/>
+                    <rect x="23" y="32" width="3" height="1" fill="black"/>
+                    <rect x="23" y="38" width="3" height="1" fill="black"/>
+                </svg>
+                <span class="logo-text">angar</span>
+            </div>
+        </div>
+
+        <!-- Option 9: Hanging Picture -->
+        <div class="logo-option">
+            <h3>9. Hanging Frame</h3>
+            <div class="logo-display">
+                <svg viewBox="0 0 32 44" fill="none">
+                    <!-- Wire to nail -->
+                    <path d="M8 10 L16 0 L24 10" stroke="white" stroke-width="2" fill="none"/>
+                    <!-- Nail dot -->
+                    <circle cx="16" cy="0" r="2" fill="white"/>
+                    <!-- Frame (forms H shape) -->
+                    <rect x="4" y="10" width="4" height="34" fill="white"/>
+                    <rect x="4" y="10" width="24" height="4" fill="white"/>
+                    <rect x="4" y="22" width="24" height="4" fill="white"/>
+                    <rect x="24" y="10" width="4" height="34" fill="white"/>
+                    <rect x="4" y="40" width="24" height="4" fill="white"/>
+                </svg>
+                <span class="logo-text">angar</span>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
