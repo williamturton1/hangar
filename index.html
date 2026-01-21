@@ -335,57 +335,30 @@
             margin-top: 4px;
         }
 
-        .diagram-section {
-            display: flex;
-            align-items: flex-end;
-            gap: 16px;
-            margin: 20px 0;
-        }
-
-        .human-scale {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            flex-shrink: 0;
-        }
-
-        .human-figure {
-            position: relative;
-            width: 40px;
-        }
-
-        .human-figure svg {
-            width: 100%;
-            height: auto;
-        }
-
-        .eye-level-marker {
-            position: absolute;
-            right: -50px;
-            font-size: 0.6rem;
-            color: #666;
-            white-space: nowrap;
-            background: #111;
-            padding: 1px 4px;
-        }
-
-        .human-label {
-            font-size: 0.6rem;
-            color: #666;
-            margin-top: 4px;
-        }
-
         .canvas-container {
-            flex: 1;
             position: relative;
             background: #fff;
-            border: 1px solid #333;
+            border: 2px solid #000;
+            margin: 20px 0;
         }
 
         #diagramCanvas {
             display: block;
             width: 100%;
             height: auto;
+        }
+
+        .canvas-tooltip {
+            position: absolute;
+            background: #000;
+            color: #0f0;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            pointer-events: none;
+            display: none;
+            white-space: nowrap;
+            z-index: 100;
         }
 
         .diagram-actions {
@@ -490,6 +463,170 @@
             padding: 20px;
         }
 
+        .color-toggle {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #333;
+            border: 1px solid #555;
+            color: #888;
+            padding: 6px 12px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            font-family: inherit;
+            z-index: 1000;
+        }
+
+        .color-toggle:hover {
+            background: #444;
+            color: #fff;
+        }
+
+        /* Light mode */
+        body.light-mode {
+            background: #fff;
+            color: #333;
+        }
+
+        body.light-mode .card {
+            background: #f5f5f5;
+            border-color: #ddd;
+        }
+
+        body.light-mode .card h2 {
+            color: #000;
+            border-bottom-color: #ddd;
+        }
+
+        body.light-mode input[type="text"],
+        body.light-mode input[type="number"] {
+            background: #fff;
+            color: #000;
+            border-color: #ccc;
+        }
+
+        body.light-mode input:focus {
+            border-color: #000;
+        }
+
+        body.light-mode input::placeholder {
+            color: #999;
+        }
+
+        body.light-mode .unit-toggle,
+        body.light-mode .spacing-toggle {
+            background: #fff;
+            border-color: #ccc;
+        }
+
+        body.light-mode .unit-toggle button,
+        body.light-mode .spacing-toggle button {
+            color: #666;
+        }
+
+        body.light-mode .unit-toggle button.active,
+        body.light-mode .spacing-toggle button.active {
+            background: #000;
+            color: #fff;
+        }
+
+        body.light-mode .piece-card {
+            background: #eee;
+            border-color: #ddd;
+        }
+
+        body.light-mode .piece-card h3 {
+            color: #000;
+        }
+
+        body.light-mode .btn-add {
+            border-color: #ccc;
+            color: #666;
+        }
+
+        body.light-mode .btn-add:hover {
+            border-color: #000;
+            color: #000;
+        }
+
+        body.light-mode .btn {
+            background: #000;
+            color: #fff;
+        }
+
+        body.light-mode .btn:hover {
+            background: #333;
+        }
+
+        body.light-mode .btn-secondary {
+            background: #ccc;
+            color: #000;
+        }
+
+        body.light-mode .btn-secondary:hover {
+            background: #bbb;
+        }
+
+        body.light-mode .result-item {
+            background: #eee;
+            border-left-color: #000;
+        }
+
+        body.light-mode .result-item h3 {
+            color: #666;
+        }
+
+        body.light-mode .result-value {
+            color: #060;
+        }
+
+        body.light-mode .help-text,
+        body.light-mode .subtitle {
+            color: #888;
+        }
+
+        body.light-mode label {
+            color: #555;
+        }
+
+        body.light-mode .credits {
+            color: #aaa;
+        }
+
+        body.light-mode .canvas-container {
+            border-color: #000;
+        }
+
+        body.light-mode .btn-save {
+            background: #ddd;
+            color: #000;
+        }
+
+        body.light-mode .btn-save:hover {
+            background: #ccc;
+        }
+
+        body.light-mode .color-toggle {
+            background: #eee;
+            border-color: #ccc;
+            color: #666;
+        }
+
+        body.light-mode .color-toggle:hover {
+            background: #ddd;
+            color: #000;
+        }
+
+        body.light-mode .btn-remove {
+            border-color: #ccc;
+            color: #888;
+        }
+
+        body.light-mode .btn-remove:hover {
+            background: #ddd;
+            color: #000;
+        }
+
         @media (max-width: 600px) {
             .input-row, .settings-row {
                 flex-direction: column;
@@ -498,6 +635,7 @@
     </style>
 </head>
 <body>
+    <button class="color-toggle" onclick="toggleColorMode()" id="colorToggle">light mode</button>
     <div class="container">
         <div class="logo">
             <div class="logo-h">
@@ -586,30 +724,9 @@
 
             <div class="card">
                 <h2>Wall Diagram</h2>
-                <div class="diagram-section">
-                    <div class="human-scale" id="humanScale">
-                        <div class="human-figure" id="humanFigure">
-                            <svg viewBox="0 0 40 170" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <!-- Head -->
-                                <circle cx="20" cy="12" r="10" stroke="#666" stroke-width="2" fill="none"/>
-                                <!-- Body -->
-                                <line x1="20" y1="22" x2="20" y2="80" stroke="#666" stroke-width="2"/>
-                                <!-- Arms -->
-                                <line x1="20" y1="35" x2="5" y2="60" stroke="#666" stroke-width="2"/>
-                                <line x1="20" y1="35" x2="35" y2="60" stroke="#666" stroke-width="2"/>
-                                <!-- Legs -->
-                                <line x1="20" y1="80" x2="8" y2="130" stroke="#666" stroke-width="2"/>
-                                <line x1="20" y1="80" x2="32" y2="130" stroke="#666" stroke-width="2"/>
-                                <!-- Eye level indicator -->
-                                <line x1="0" y1="12" x2="40" y2="12" stroke="#0f0" stroke-width="1" stroke-dasharray="3,3"/>
-                            </svg>
-                            <div class="eye-level-marker" id="eyeLevelMarker">60" eye level</div>
-                        </div>
-                        <div class="human-label">5' tall reference</div>
-                    </div>
-                    <div class="canvas-container">
-                        <canvas id="diagramCanvas"></canvas>
-                    </div>
+                <div class="canvas-container" id="canvasContainer">
+                    <canvas id="diagramCanvas"></canvas>
+                    <div class="canvas-tooltip" id="canvasTooltip"></div>
                 </div>
                 <div class="diagram-actions">
                     <button class="btn-save" onclick="saveDiagram()">Save Diagram</button>
@@ -880,15 +997,20 @@
             });
         }
 
+        // Store nail hitboxes for hover detection
+        let nailHitboxes = [];
+
         function drawDiagram(wallWidthIn, wallHeightIn) {
             const canvas = document.getElementById('diagramCanvas');
             const ctx = canvas.getContext('2d');
+            nailHitboxes = [];
 
             const centerHeight = pieces.length > 0 ? pieces[0].centerHeight : 60;
             const totalPiecesWidth = pieces.reduce((sum, p) => sum + p.width, 0);
 
             // Calculate spacing based on mode
             let spacing = 0;
+            let edgeSpacing = 0;
             let effectiveWallWidth;
 
             if (pieces.length > 1) {
@@ -900,9 +1022,11 @@
                     effectiveWallWidth = wallWidthIn || Math.max(totalPiecesWidth + 60, 120);
                     const availableSpace = effectiveWallWidth - totalPiecesWidth;
                     spacing = availableSpace / (pieces.length + 1);
+                    edgeSpacing = spacing; // Edge spacing equals inter-piece spacing in even mode
                 }
             } else {
                 effectiveWallWidth = wallWidthIn || Math.max(totalPiecesWidth + 40, 80);
+                edgeSpacing = (effectiveWallWidth - totalPiecesWidth) / 2;
             }
 
             // Find highest piece top
@@ -912,14 +1036,14 @@
                 if (pieceTop > highestTop) highestTop = pieceTop;
             });
 
-            // Diagram height is just above highest piece (add 15% padding)
-            const effectiveWallHeight = highestTop * 1.15;
+            // Diagram height is just above highest piece (add 10% padding for labels)
+            const effectiveWallHeight = highestTop * 1.10;
 
-            // Set canvas size based on wall proportions
+            // Set canvas size based on exact wall proportions
             const containerWidth = canvas.parentElement.offsetWidth || 600;
             const aspectRatio = effectiveWallHeight / effectiveWallWidth;
             const canvasWidth = containerWidth;
-            const canvasHeight = Math.min(canvasWidth * aspectRatio, 500);
+            const canvasHeight = canvasWidth * aspectRatio;
 
             // Set actual canvas resolution (2x for retina)
             const dpr = window.devicePixelRatio || 1;
@@ -929,67 +1053,41 @@
             canvas.style.height = canvasHeight + 'px';
             ctx.scale(dpr, dpr);
 
-            // Scale human figure to match
-            const humanFigure = document.getElementById('humanFigure');
-            const humanHeightInches = 66; // 5'6" average
-            const scale = canvasHeight / effectiveWallHeight;
-            const humanPixelHeight = humanHeightInches * scale;
-            humanFigure.style.height = humanPixelHeight + 'px';
-
-            // Position eye level marker (60" from floor)
-            const eyeLevelMarker = document.getElementById('eyeLevelMarker');
-            const eyeLevelFromTop = (humanHeightInches - 60) * scale;
-            eyeLevelMarker.style.top = eyeLevelFromTop + 'px';
-            eyeLevelMarker.textContent = formatResult(centerHeight) + ' eye level';
-
-            // Clear canvas
+            // Clear canvas - exact wall representation
             ctx.fillStyle = '#fff';
             ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-            const padding = 50;
-            const drawWidth = canvasWidth - padding * 2;
-            const drawHeight = canvasHeight - padding;
-            const scaleX = drawWidth / effectiveWallWidth;
-            const scaleY = drawHeight / effectiveWallHeight;
-            const drawScale = Math.min(scaleX, scaleY);
+            // Scale: 1 inch = X pixels (wall fills canvas exactly)
+            const drawScale = canvasWidth / effectiveWallWidth;
 
-            // Floor line (thick, at bottom)
+            // Floor line (thick, at bottom - this IS the wall edge)
             ctx.strokeStyle = '#000';
-            ctx.lineWidth = 3;
+            ctx.lineWidth = 4;
             ctx.beginPath();
-            ctx.moveTo(0, canvasHeight - 2);
-            ctx.lineTo(canvasWidth, canvasHeight - 2);
+            ctx.moveTo(0, canvasHeight);
+            ctx.lineTo(canvasWidth, canvasHeight);
+            ctx.stroke();
+
+            // Wall edges (left and right)
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(0, canvasHeight);
+            ctx.moveTo(canvasWidth, 0);
+            ctx.lineTo(canvasWidth, canvasHeight);
             ctx.stroke();
 
             // Floor label
             ctx.fillStyle = '#000';
-            ctx.font = 'bold 12px monospace';
-            ctx.textAlign = 'right';
-            ctx.fillText('FLOOR', canvasWidth - 10, canvasHeight - 8);
-
-            // Ceiling line (at top of diagram area)
-            ctx.strokeStyle = '#999';
-            ctx.lineWidth = 1;
-            ctx.setLineDash([5, 5]);
-            ctx.beginPath();
-            ctx.moveTo(0, 10);
-            ctx.lineTo(canvasWidth, 10);
-            ctx.stroke();
-            ctx.setLineDash([]);
-
-            // Ceiling label
-            ctx.fillStyle = '#999';
-            ctx.font = '10px monospace';
-            ctx.textAlign = 'right';
-            ctx.fillText('CEILING', canvasWidth - 10, 22);
+            ctx.font = 'bold 11px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('FLOOR', canvasWidth / 2, canvasHeight - 6);
 
             // Calculate starting X position
             let currentX;
             if (pieces.length > 1 && spacingMode === 'even') {
-                currentX = padding + (spacing * drawScale);
+                currentX = edgeSpacing * drawScale;
             } else {
-                const totalWidth = totalPiecesWidth + spacing * (pieces.length - 1);
-                currentX = (canvasWidth - totalWidth * drawScale) / 2;
+                currentX = edgeSpacing * drawScale;
             }
 
             // Draw center height reference line (dotted)
@@ -1005,9 +1103,9 @@
 
             // Center height label
             ctx.fillStyle = '#666';
-            ctx.font = '10px monospace';
+            ctx.font = '9px monospace';
             ctx.textAlign = 'right';
-            ctx.fillText(formatResult(centerHeight) + ' center', canvasWidth - 10, centerHeightY - 5);
+            ctx.fillText(formatResult(centerHeight) + ' center', canvasWidth - 5, centerHeightY - 3);
 
             // Draw pieces
             pieces.forEach((piece, i) => {
@@ -1019,7 +1117,7 @@
 
                 // Frame
                 ctx.strokeStyle = '#000';
-                ctx.lineWidth = 3;
+                ctx.lineWidth = 2;
                 ctx.strokeRect(currentX, picTop, picWidth, picHeight);
 
                 // Dotted center line on each piece
@@ -1034,7 +1132,7 @@
 
                 // Piece number
                 ctx.fillStyle = '#000';
-                ctx.font = 'bold 16px monospace';
+                ctx.font = 'bold 14px monospace';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(piece.index.toString(), picCenterX, picTop + picHeight / 2);
@@ -1044,13 +1142,25 @@
                 const nailOffset = (piece.span / 2) * drawScale;
                 const nail1X = picCenterX - nailOffset;
                 const nail2X = picCenterX + nailOffset;
+                const circleRadius = 8;
+                const xSize = 4;
 
-                // Draw red X markers for nails
+                // Dotted line connecting nails
                 ctx.strokeStyle = '#f00';
-                ctx.lineWidth = 3;
-                const xSize = 8;
+                ctx.lineWidth = 1;
+                ctx.setLineDash([3, 3]);
+                ctx.beginPath();
+                ctx.moveTo(nail1X + circleRadius, nailY);
+                ctx.lineTo(nail2X - circleRadius, nailY);
+                ctx.stroke();
+                ctx.setLineDash([]);
 
-                // Left nail X
+                // Left nail - red circle with X
+                ctx.strokeStyle = '#f00';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(nail1X, nailY, circleRadius, 0, Math.PI * 2);
+                ctx.stroke();
                 ctx.beginPath();
                 ctx.moveTo(nail1X - xSize, nailY - xSize);
                 ctx.lineTo(nail1X + xSize, nailY + xSize);
@@ -1058,7 +1168,10 @@
                 ctx.lineTo(nail1X - xSize, nailY + xSize);
                 ctx.stroke();
 
-                // Right nail X
+                // Right nail - red circle with X
+                ctx.beginPath();
+                ctx.arc(nail2X, nailY, circleRadius, 0, Math.PI * 2);
+                ctx.stroke();
                 ctx.beginPath();
                 ctx.moveTo(nail2X - xSize, nailY - xSize);
                 ctx.lineTo(nail2X + xSize, nailY + xSize);
@@ -1066,47 +1179,22 @@
                 ctx.lineTo(nail2X - xSize, nailY + xSize);
                 ctx.stroke();
 
-                // Nail height label
+                // Store hitbox for hover (the line between nails)
+                nailHitboxes.push({
+                    x1: nail1X,
+                    x2: nail2X,
+                    y: nailY,
+                    span: piece.span
+                });
+
+                // Nail height label (left side)
                 ctx.fillStyle = '#000';
-                ctx.fillRect(5, nailY - 8, 55, 16);
+                ctx.fillRect(2, nailY - 7, 50, 14);
                 ctx.fillStyle = '#0f0';
-                ctx.font = 'bold 11px monospace';
+                ctx.font = 'bold 10px monospace';
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(formatResult(piece.nailHeight), 8, nailY);
-
-                // Leader line to nail
-                ctx.strokeStyle = '#000';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.moveTo(60, nailY);
-                ctx.lineTo(nail1X - xSize - 5, nailY);
-                ctx.stroke();
-
-                // Height measurement line (vertical from floor to nail)
-                ctx.strokeStyle = '#000';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.moveTo(currentX - 15, canvasHeight - 2);
-                ctx.lineTo(currentX - 15, nailY);
-                ctx.stroke();
-
-                // Span measurement above frame
-                ctx.fillStyle = '#000';
-                ctx.fillRect(picCenterX - 30, picTop - 25, 60, 16);
-                ctx.fillStyle = '#0f0';
-                ctx.font = 'bold 11px monospace';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(formatResult(piece.span), picCenterX, picTop - 17);
-
-                // Span line
-                ctx.strokeStyle = '#000';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.moveTo(nail1X, picTop - 10);
-                ctx.lineTo(nail2X, picTop - 10);
-                ctx.stroke();
+                ctx.fillText(formatResult(piece.nailHeight), 5, nailY);
 
                 // Store positions for spacing indicators
                 piece.rightEdgeX = currentX + picWidth;
@@ -1117,16 +1205,55 @@
                 currentX += picWidth + spacing * drawScale;
             });
 
+            // Draw edge spacing for even mode
+            if (pieces.length >= 1 && spacingMode === 'even') {
+                const firstPiece = pieces[0];
+                const lastPiece = pieces[pieces.length - 1];
+                const midY = (firstPiece.picTop + firstPiece.picBottom) / 2;
+
+                // Left edge spacing
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(2, midY);
+                ctx.lineTo(firstPiece.leftEdgeX - 2, midY);
+                ctx.stroke();
+
+                // Left edge label
+                ctx.fillStyle = '#000';
+                ctx.fillRect(firstPiece.leftEdgeX / 2 - 22, midY - 20, 44, 14);
+                ctx.fillStyle = '#0f0';
+                ctx.font = 'bold 9px monospace';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(formatResult(edgeSpacing), firstPiece.leftEdgeX / 2, midY - 13);
+
+                // Right edge spacing
+                ctx.strokeStyle = '#000';
+                ctx.beginPath();
+                ctx.moveTo(lastPiece.rightEdgeX + 2, midY);
+                ctx.lineTo(canvasWidth - 2, midY);
+                ctx.stroke();
+
+                // Right edge label - "repeat"
+                const rightEdgeMid = lastPiece.rightEdgeX + (canvasWidth - lastPiece.rightEdgeX) / 2;
+                ctx.fillStyle = '#000';
+                ctx.fillRect(rightEdgeMid - 25, midY - 20, 50, 14);
+                ctx.fillStyle = '#888';
+                ctx.font = '8px monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText('(repeat)', rightEdgeMid, midY - 13);
+            }
+
             // Draw spacing indicators between paintings
             if (pieces.length > 1) {
                 for (let i = 0; i < pieces.length - 1; i++) {
                     const leftPiece = pieces[i];
                     const rightPiece = pieces[i + 1];
 
-                    const gapStart = leftPiece.rightEdgeX + 3;
-                    const gapEnd = rightPiece.leftEdgeX - 3;
-                    const gapWidth = gapEnd - gapStart;
-                    const gapCenterX = gapStart + gapWidth / 2;
+                    const gapStart = leftPiece.rightEdgeX + 2;
+                    const gapEnd = rightPiece.leftEdgeX - 2;
+                    const gapCenterX = (gapStart + gapEnd) / 2;
 
                     const avgTop = (leftPiece.picTop + rightPiece.picTop) / 2;
                     const avgBottom = (leftPiece.picBottom + rightPiece.picBottom) / 2;
@@ -1142,12 +1269,12 @@
 
                     // Spacing label
                     ctx.fillStyle = '#000';
-                    ctx.fillRect(gapCenterX - 25, lineY - 22, 50, 16);
+                    ctx.fillRect(gapCenterX - 22, lineY - 20, 44, 14);
                     ctx.fillStyle = '#0f0';
-                    ctx.font = 'bold 10px monospace';
+                    ctx.font = 'bold 9px monospace';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.fillText(formatResult(spacing), gapCenterX, lineY - 14);
+                    ctx.fillText(formatResult(spacing), gapCenterX, lineY - 13);
                 }
             }
 
@@ -1157,19 +1284,53 @@
             ctx.lineWidth = 1;
             ctx.setLineDash([4, 4]);
             ctx.beginPath();
-            ctx.moveTo(wallCenterX, 30);
-            ctx.lineTo(wallCenterX, canvasHeight - 10);
+            ctx.moveTo(wallCenterX, 0);
+            ctx.lineTo(wallCenterX, canvasHeight - 15);
             ctx.stroke();
             ctx.setLineDash([]);
 
-            // Wall center label
+            // Wall center label at top
             ctx.fillStyle = '#000';
-            ctx.fillRect(wallCenterX - 25, 12, 50, 14);
+            ctx.fillRect(wallCenterX - 22, 2, 44, 12);
             ctx.fillStyle = '#fff';
-            ctx.font = '10px monospace';
+            ctx.font = '9px monospace';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText('CENTER', wallCenterX, 19);
+            ctx.fillText('CENTER', wallCenterX, 8);
+
+            // Setup hover listener
+            setupCanvasHover();
+        }
+
+        function setupCanvasHover() {
+            const canvas = document.getElementById('diagramCanvas');
+            const tooltip = document.getElementById('canvasTooltip');
+
+            canvas.onmousemove = function(e) {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                let found = false;
+                for (const box of nailHitboxes) {
+                    // Check if mouse is near the line between nails
+                    if (x >= box.x1 - 5 && x <= box.x2 + 5 && Math.abs(y - box.y) < 15) {
+                        tooltip.textContent = 'Span: ' + formatResult(box.span);
+                        tooltip.style.left = (x + 10) + 'px';
+                        tooltip.style.top = (y - 25) + 'px';
+                        tooltip.style.display = 'block';
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    tooltip.style.display = 'none';
+                }
+            };
+
+            canvas.onmouseleave = function() {
+                tooltip.style.display = 'none';
+            };
         }
 
         function saveDiagram() {
@@ -1205,6 +1366,16 @@
         document.addEventListener('DOMContentLoaded', function() {
             addPiece();
         });
+
+        function toggleColorMode() {
+            document.body.classList.toggle('light-mode');
+            const btn = document.getElementById('colorToggle');
+            if (document.body.classList.contains('light-mode')) {
+                btn.textContent = 'dark mode';
+            } else {
+                btn.textContent = 'light mode';
+            }
+        }
 
         // Debug functions
         function toggleDebug() {
