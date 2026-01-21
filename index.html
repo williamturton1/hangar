@@ -365,6 +365,40 @@
             display: flex;
             gap: 8px;
             margin-top: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .view-toggle {
+            display: flex;
+            background: #222;
+            border: 1px solid #333;
+            margin-left: auto;
+        }
+
+        .view-toggle button {
+            padding: 6px 12px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 0.75rem;
+            color: #666;
+            font-family: inherit;
+        }
+
+        .view-toggle button.active {
+            background: #444;
+            color: #fff;
+        }
+
+        body.light-mode .view-toggle {
+            background: #eee;
+            border-color: #ccc;
+        }
+
+        body.light-mode .view-toggle button.active {
+            background: #000;
+            color: #fff;
         }
 
         .btn-save {
@@ -739,6 +773,10 @@
                 <div class="diagram-actions">
                     <button class="btn-save" onclick="saveDiagram()">Save Diagram</button>
                     <button class="btn-save" onclick="copyDiagram()">Copy to Clipboard</button>
+                    <div class="view-toggle">
+                        <button class="active" id="viewFull" onclick="setViewMode('full')">Full</button>
+                        <button id="viewNails" onclick="setViewMode('nails')">Nails Only</button>
+                    </div>
                 </div>
             </div>
 
@@ -756,6 +794,7 @@
             <button onclick="debugFill2()">2 pieces</button>
             <button onclick="debugFill3()">3 pieces</button>
             <button onclick="debugFillCustom()">custom spacing</button>
+            <button onclick="debugFillRandom()">random</button>
         </div>
         <button class="debug-toggle" onclick="toggleDebug()" title="Debug">?</button>
     </div>
@@ -765,6 +804,7 @@
         let pieceCount = 1;
         let pieces = [];
         let spacingMode = 'even'; // 'even' or 'custom'
+        let viewMode = 'full'; // 'full' or 'nails'
         const CM_PER_INCH = 2.54;
 
         function setSpacingMode(mode) {
@@ -1123,35 +1163,37 @@
                 const picTop = picBottom - picHeight;
                 const picCenterX = currentX + picWidth / 2;
 
-                // Frame
-                ctx.strokeStyle = '#000';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(currentX, picTop, picWidth, picHeight);
-
-                // Dotted center line on each piece
-                ctx.strokeStyle = '#666';
-                ctx.lineWidth = 1;
-                ctx.setLineDash([4, 4]);
-                ctx.beginPath();
-                ctx.moveTo(picCenterX, picTop);
-                ctx.lineTo(picCenterX, picBottom);
-                ctx.stroke();
-                ctx.setLineDash([]);
-
-                // Piece number
-                ctx.fillStyle = '#000';
-                ctx.font = 'bold 14px monospace';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(piece.index.toString(), picCenterX, picTop + picHeight / 2);
-
-                // Nail positions
+                // Nail positions (calculated for both modes)
                 const nailY = canvasHeight - (piece.nailHeight * drawScale);
                 const nailOffset = (piece.span / 2) * drawScale;
                 const nail1X = picCenterX - nailOffset;
                 const nail2X = picCenterX + nailOffset;
                 const circleRadius = 8;
                 const xSize = 4;
+
+                if (viewMode === 'full') {
+                    // Frame
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(currentX, picTop, picWidth, picHeight);
+
+                    // Dotted center line on each piece
+                    ctx.strokeStyle = '#666';
+                    ctx.lineWidth = 1;
+                    ctx.setLineDash([4, 4]);
+                    ctx.beginPath();
+                    ctx.moveTo(picCenterX, picTop);
+                    ctx.lineTo(picCenterX, picBottom);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+
+                    // Piece number
+                    ctx.fillStyle = '#000';
+                    ctx.font = 'bold 14px monospace';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(piece.index.toString(), picCenterX, picTop + picHeight / 2);
+                }
 
                 // Dotted line connecting nails
                 ctx.strokeStyle = '#f00';
@@ -1162,6 +1204,16 @@
                 ctx.lineTo(nail2X - circleRadius, nailY);
                 ctx.stroke();
                 ctx.setLineDash([]);
+
+                // Span label between nails (shown by default now)
+                const spanLabelX = (nail1X + nail2X) / 2;
+                ctx.fillStyle = '#000';
+                ctx.fillRect(spanLabelX - 22, nailY - 18, 44, 12);
+                ctx.fillStyle = '#0f0';
+                ctx.font = 'bold 9px monospace';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(formatResult(piece.span), spanLabelX, nailY - 12);
 
                 // Left nail - red circle with X
                 ctx.strokeStyle = '#f00';
@@ -1204,85 +1256,138 @@
                 ctx.textBaseline = 'middle';
                 ctx.fillText(formatResult(piece.nailHeight), 5, nailY);
 
+                // In nails-only mode, show distance from left wall to first nail
+                if (viewMode === 'nails') {
+                    const distFromLeft = nail1X;
+                    // Distance from wall corner to first nail
+                    ctx.strokeStyle = '#666';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(2, nailY + 20);
+                    ctx.lineTo(nail1X, nailY + 20);
+                    ctx.stroke();
+                    // Label
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(distFromLeft / 2 - 22, nailY + 25, 44, 12);
+                    ctx.fillStyle = '#888';
+                    ctx.font = '8px monospace';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(formatResult(nail1X / drawScale), distFromLeft / 2, nailY + 31);
+                }
+
                 // Store positions for spacing indicators
                 piece.rightEdgeX = currentX + picWidth;
                 piece.leftEdgeX = currentX;
                 piece.picTop = picTop;
                 piece.picBottom = picBottom;
+                piece.nail1X = nail1X;
+                piece.nail2X = nail2X;
+                piece.nailY = nailY;
 
                 currentX += picWidth + spacing * drawScale;
             });
 
-            // Draw edge spacing for even mode
-            if (pieces.length >= 1 && spacingMode === 'even') {
-                const firstPiece = pieces[0];
-                const lastPiece = pieces[pieces.length - 1];
-                const midY = (firstPiece.picTop + firstPiece.picBottom) / 2;
+            if (viewMode === 'full') {
+                // Draw edge spacing for even mode
+                if (pieces.length >= 1 && spacingMode === 'even') {
+                    const firstPiece = pieces[0];
+                    const lastPiece = pieces[pieces.length - 1];
+                    const midY = (firstPiece.picTop + firstPiece.picBottom) / 2;
 
-                // Left edge spacing
-                ctx.strokeStyle = '#000';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.moveTo(2, midY);
-                ctx.lineTo(firstPiece.leftEdgeX - 2, midY);
-                ctx.stroke();
-
-                // Left edge label
-                ctx.fillStyle = '#000';
-                ctx.fillRect(firstPiece.leftEdgeX / 2 - 22, midY - 20, 44, 14);
-                ctx.fillStyle = '#0f0';
-                ctx.font = 'bold 9px monospace';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(formatResult(edgeSpacing), firstPiece.leftEdgeX / 2, midY - 13);
-
-                // Right edge spacing
-                ctx.strokeStyle = '#000';
-                ctx.beginPath();
-                ctx.moveTo(lastPiece.rightEdgeX + 2, midY);
-                ctx.lineTo(canvasWidth - 2, midY);
-                ctx.stroke();
-
-                // Right edge label - "repeat"
-                const rightEdgeMid = lastPiece.rightEdgeX + (canvasWidth - lastPiece.rightEdgeX) / 2;
-                ctx.fillStyle = '#000';
-                ctx.fillRect(rightEdgeMid - 25, midY - 20, 50, 14);
-                ctx.fillStyle = '#888';
-                ctx.font = '8px monospace';
-                ctx.textAlign = 'center';
-                ctx.fillText('(repeat)', rightEdgeMid, midY - 13);
-            }
-
-            // Draw spacing indicators between paintings
-            if (pieces.length > 1) {
-                for (let i = 0; i < pieces.length - 1; i++) {
-                    const leftPiece = pieces[i];
-                    const rightPiece = pieces[i + 1];
-
-                    const gapStart = leftPiece.rightEdgeX + 2;
-                    const gapEnd = rightPiece.leftEdgeX - 2;
-                    const gapCenterX = (gapStart + gapEnd) / 2;
-
-                    const avgTop = (leftPiece.picTop + rightPiece.picTop) / 2;
-                    const avgBottom = (leftPiece.picBottom + rightPiece.picBottom) / 2;
-                    const lineY = avgTop + (avgBottom - avgTop) / 2;
-
-                    // Spacing line
+                    // Left edge spacing
                     ctx.strokeStyle = '#000';
                     ctx.lineWidth = 1;
                     ctx.beginPath();
-                    ctx.moveTo(gapStart, lineY);
-                    ctx.lineTo(gapEnd, lineY);
+                    ctx.moveTo(2, midY);
+                    ctx.lineTo(firstPiece.leftEdgeX - 2, midY);
                     ctx.stroke();
 
-                    // Spacing label
+                    // Left edge label
                     ctx.fillStyle = '#000';
-                    ctx.fillRect(gapCenterX - 22, lineY - 20, 44, 14);
+                    ctx.fillRect(firstPiece.leftEdgeX / 2 - 22, midY - 20, 44, 14);
                     ctx.fillStyle = '#0f0';
                     ctx.font = 'bold 9px monospace';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.fillText(formatResult(spacing), gapCenterX, lineY - 13);
+                    ctx.fillText(formatResult(edgeSpacing), firstPiece.leftEdgeX / 2, midY - 13);
+
+                    // Right edge spacing
+                    ctx.strokeStyle = '#000';
+                    ctx.beginPath();
+                    ctx.moveTo(lastPiece.rightEdgeX + 2, midY);
+                    ctx.lineTo(canvasWidth - 2, midY);
+                    ctx.stroke();
+
+                    // Right edge label - "repeat"
+                    const rightEdgeMid = lastPiece.rightEdgeX + (canvasWidth - lastPiece.rightEdgeX) / 2;
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(rightEdgeMid - 25, midY - 20, 50, 14);
+                    ctx.fillStyle = '#888';
+                    ctx.font = '8px monospace';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('(repeat)', rightEdgeMid, midY - 13);
+                }
+
+                // Draw spacing indicators between paintings
+                if (pieces.length > 1) {
+                    for (let i = 0; i < pieces.length - 1; i++) {
+                        const leftPiece = pieces[i];
+                        const rightPiece = pieces[i + 1];
+
+                        const gapStart = leftPiece.rightEdgeX + 2;
+                        const gapEnd = rightPiece.leftEdgeX - 2;
+                        const gapCenterX = (gapStart + gapEnd) / 2;
+
+                        const avgTop = (leftPiece.picTop + rightPiece.picTop) / 2;
+                        const avgBottom = (leftPiece.picBottom + rightPiece.picBottom) / 2;
+                        const lineY = avgTop + (avgBottom - avgTop) / 2;
+
+                        // Spacing line
+                        ctx.strokeStyle = '#000';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(gapStart, lineY);
+                        ctx.lineTo(gapEnd, lineY);
+                        ctx.stroke();
+
+                        // Spacing label
+                        ctx.fillStyle = '#000';
+                        ctx.fillRect(gapCenterX - 22, lineY - 20, 44, 14);
+                        ctx.fillStyle = '#0f0';
+                        ctx.font = 'bold 9px monospace';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(formatResult(spacing), gapCenterX, lineY - 13);
+                    }
+                }
+            }
+
+            // Nails-only mode: show distances between nail groups
+            if (viewMode === 'nails' && pieces.length > 1) {
+                for (let i = 0; i < pieces.length - 1; i++) {
+                    const leftPiece = pieces[i];
+                    const rightPiece = pieces[i + 1];
+                    const avgNailY = (leftPiece.nailY + rightPiece.nailY) / 2;
+
+                    // Distance from right nail of left piece to left nail of right piece
+                    const gapStart = leftPiece.nail2X;
+                    const gapEnd = rightPiece.nail1X;
+                    const gapCenterX = (gapStart + gapEnd) / 2;
+                    const gapDistance = (gapEnd - gapStart) / drawScale;
+
+                    ctx.strokeStyle = '#666';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(gapStart + 10, avgNailY + 25);
+                    ctx.lineTo(gapEnd - 10, avgNailY + 25);
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(gapCenterX - 25, avgNailY + 30, 50, 12);
+                    ctx.fillStyle = '#888';
+                    ctx.font = '8px monospace';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(formatResult(gapDistance), gapCenterX, avgNailY + 36);
                 }
             }
 
@@ -1450,6 +1555,57 @@
                 document.getElementById('debugMenu').classList.remove('open');
                 calculate();
             }, 50);
+        }
+
+        function debugFillRandom() {
+            startOver();
+            // Random wall width between 72" (6ft) and 240" (20ft)
+            const wallWidth = Math.floor(Math.random() * 168) + 72;
+            document.getElementById('wallWidth').value = wallWidth;
+            document.getElementById('centerHeight').value = '60'; // Keep 60" center
+
+            // Random number of pieces (1-4)
+            const numPieces = Math.floor(Math.random() * 4) + 1;
+
+            function fillRandomPiece(card) {
+                const width = Math.floor(Math.random() * 30) + 12; // 12-42"
+                const height = Math.floor(Math.random() * 40) + 16; // 16-56"
+                const span = Math.floor(Math.random() * (width - 8)) + 6; // 6 to width-2
+                const fromTop = Math.floor(Math.random() * 6) + 2; // 2-8"
+                fillPieceValues(card, width, height, span, fromTop);
+            }
+
+            const firstCard = document.querySelectorAll('.piece-card')[0];
+            fillRandomPiece(firstCard);
+
+            if (numPieces > 1) {
+                for (let i = 1; i < numPieces; i++) {
+                    addPiece();
+                }
+                setTimeout(() => {
+                    const cards = document.querySelectorAll('.piece-card');
+                    for (let i = 1; i < cards.length; i++) {
+                        fillRandomPiece(cards[i]);
+                    }
+                    document.getElementById('debugMenu').classList.remove('open');
+                    calculate();
+                }, 50);
+            } else {
+                document.getElementById('debugMenu').classList.remove('open');
+                calculate();
+            }
+        }
+
+        function setViewMode(mode) {
+            viewMode = mode;
+            document.getElementById('viewFull').classList.toggle('active', mode === 'full');
+            document.getElementById('viewNails').classList.toggle('active', mode === 'nails');
+            // Redraw if we have results
+            if (!document.getElementById('results').classList.contains('hidden')) {
+                const wallWidth = parseMixedNumber(document.getElementById('wallWidth').value);
+                const wallHeight = parseMixedNumber(document.getElementById('wallHeight').value);
+                drawDiagram(wallWidth ? toInches(wallWidth) : null, wallHeight ? toInches(wallHeight) : null);
+            }
         }
     </script>
 </body>
