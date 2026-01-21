@@ -36,8 +36,8 @@
 
         .logo-h {
             position: relative;
-            width: 32px;
-            height: 56px;
+            width: 28px;
+            height: 52px;
         }
 
         .logo-text {
@@ -285,11 +285,11 @@
 
         .nail {
             position: absolute;
-            width: 16px;
-            height: 16px;
+            width: 24px;
+            height: 24px;
             transform: translate(-50%, -50%);
             z-index: 20;
-            font-size: 12px;
+            font-size: 20px;
             font-weight: bold;
             color: #000;
             display: flex;
@@ -298,7 +298,61 @@
         }
 
         .nail::before {
-            content: 'x';
+            content: 'X';
+        }
+
+        .frame-number {
+            position: absolute;
+            color: #000;
+            font-size: 1.2rem;
+            font-weight: 700;
+            z-index: 10;
+        }
+
+        .leader-line {
+            position: absolute;
+            border-top: 1px solid #000;
+            z-index: 25;
+        }
+
+        .center-height-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: repeating-linear-gradient(
+                to right,
+                #999 0px,
+                #999 3px,
+                transparent 3px,
+                transparent 8px
+            );
+            z-index: 2;
+        }
+
+        .center-height-label {
+            position: absolute;
+            right: 6px;
+            background: #fff;
+            color: #666;
+            padding: 1px 4px;
+            font-size: 0.6rem;
+            z-index: 3;
+        }
+
+        .hardware-height-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: repeating-linear-gradient(
+                to right,
+                #666 0px,
+                #666 6px,
+                transparent 6px,
+                transparent 12px
+            );
+            z-index: 2;
         }
 
         .spacing-line {
@@ -378,7 +432,7 @@
         .settings-row {
             display: flex;
             gap: 12px;
-            align-items: flex-end;
+            align-items: flex-start;
             flex-wrap: wrap;
         }
 
@@ -407,25 +461,25 @@
     <div class="container">
         <div class="logo">
             <div class="logo-h">
-                <svg viewBox="0 0 32 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Tape measure body (the h shape) -->
-                    <!-- Left vertical of h -->
-                    <rect x="2" y="24" width="4" height="20" fill="white"/>
-                    <!-- Right vertical of h (tape measure body) -->
-                    <rect x="18" y="28" width="8" height="16" fill="white"/>
-                    <!-- Horizontal bar of h -->
-                    <rect x="2" y="32" width="20" height="4" fill="white"/>
-                    <!-- Tape extending upward -->
-                    <rect x="20" y="0" width="4" height="28" fill="white"/>
-                    <!-- Tape measure marks -->
-                    <rect x="24" y="2" width="3" height="1" fill="white"/>
-                    <rect x="24" y="6" width="2" height="1" fill="white"/>
-                    <rect x="24" y="10" width="3" height="1" fill="white"/>
-                    <rect x="24" y="14" width="2" height="1" fill="white"/>
-                    <rect x="24" y="18" width="3" height="1" fill="white"/>
-                    <rect x="24" y="22" width="2" height="1" fill="white"/>
-                    <!-- Small hook at top of tape -->
-                    <rect x="19" y="0" width="6" height="2" fill="white"/>
+                <svg viewBox="0 0 28 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Lowercase h with tape measure -->
+                    <!-- Left vertical stroke (tall, with tape extending up) -->
+                    <rect x="2" y="18" width="4" height="22" fill="white"/>
+                    <!-- Tape extending upward from left stroke -->
+                    <rect x="2" y="0" width="4" height="18" fill="white"/>
+                    <!-- Tape measure marks on left side -->
+                    <rect x="0" y="2" width="2" height="1" fill="white"/>
+                    <rect x="0" y="6" width="1" height="1" fill="white"/>
+                    <rect x="0" y="10" width="2" height="1" fill="white"/>
+                    <rect x="0" y="14" width="1" height="1" fill="white"/>
+                    <!-- Hook at top of tape -->
+                    <rect x="0" y="0" width="6" height="2" fill="white"/>
+                    <!-- Arch/hump of lowercase h -->
+                    <rect x="6" y="26" width="4" height="4" fill="white"/>
+                    <rect x="10" y="24" width="4" height="4" fill="white"/>
+                    <rect x="14" y="22" width="4" height="4" fill="white"/>
+                    <!-- Right vertical stroke (short) -->
+                    <rect x="18" y="26" width="4" height="14" fill="white"/>
                 </svg>
             </div>
             <span class="logo-text">angar</span>
@@ -729,6 +783,9 @@
 
             diagram.innerHTML = '<div class="floor-line"></div><div class="floor-label">Floor</div><div class="center-line"></div><div class="center-label">Center</div>';
 
+            // Get center height for reference lines
+            const centerHeight = pieces.length > 0 ? pieces[0].centerHeight : 60;
+
             const totalPiecesWidth = pieces.reduce((sum, p) => sum + p.width, 0);
             const spacing = pieces.length > 1 ? 12 : 0;
             const totalWidth = totalPiecesWidth + spacing * (pieces.length - 1);
@@ -745,6 +802,19 @@
 
             let currentX = (diagramWidth - (totalWidth * scale)) / 2;
 
+            // Add center height reference line (dotted)
+            const centerHeightY = diagramHeight - (centerHeight * scale);
+            const centerHeightLine = document.createElement('div');
+            centerHeightLine.className = 'center-height-line';
+            centerHeightLine.style.top = centerHeightY + 'px';
+            diagram.appendChild(centerHeightLine);
+
+            const centerHeightLabel = document.createElement('div');
+            centerHeightLabel.className = 'center-height-label';
+            centerHeightLabel.textContent = formatResult(centerHeight) + ' center';
+            centerHeightLabel.style.top = (centerHeightY - 8) + 'px';
+            diagram.appendChild(centerHeightLabel);
+
             // Track label positions to avoid overlap
             let usedLabelPositions = [];
 
@@ -753,6 +823,12 @@
                 const picHeight = piece.height * scale;
                 const picBottom = (piece.centerHeight - piece.height / 2) * scale;
 
+                // Add hardware height reference line (dashed) for each piece
+                const hardwareHeightLine = document.createElement('div');
+                hardwareHeightLine.className = 'hardware-height-line';
+                hardwareHeightLine.style.top = (diagramHeight - piece.nailHeight * scale) + 'px';
+                diagram.appendChild(hardwareHeightLine);
+
                 const frame = document.createElement('div');
                 frame.className = 'frame-8bit';
                 frame.style.width = picWidth + 'px';
@@ -760,6 +836,15 @@
                 frame.style.left = currentX + 'px';
                 frame.style.bottom = picBottom + 'px';
                 diagram.appendChild(frame);
+
+                // Add frame number
+                const frameNumber = document.createElement('div');
+                frameNumber.className = 'frame-number';
+                frameNumber.textContent = piece.index;
+                frameNumber.style.left = (currentX + picWidth / 2) + 'px';
+                frameNumber.style.bottom = (picBottom + picHeight / 2) + 'px';
+                frameNumber.style.transform = 'translate(-50%, 50%)';
+                diagram.appendChild(frameNumber);
 
                 const nailY = diagramHeight - (piece.nailHeight * scale);
                 const centerX = currentX + picWidth / 2;
@@ -796,6 +881,16 @@
                 heightLabel.style.left = labelLeft + 'px';
                 heightLabel.style.top = labelTop + 'px';
                 diagram.appendChild(heightLabel);
+
+                // Leader line from height label to nail
+                const leaderLine = document.createElement('div');
+                leaderLine.className = 'leader-line';
+                const leaderStartX = 50;
+                const leaderEndX = centerX - nailOffset - 12;
+                leaderLine.style.left = leaderStartX + 'px';
+                leaderLine.style.top = nailY + 'px';
+                leaderLine.style.width = (leaderEndX - leaderStartX) + 'px';
+                diagram.appendChild(leaderLine);
 
                 // Span label - position above the frame
                 const spanLabel = document.createElement('div');
