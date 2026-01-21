@@ -17,37 +17,8 @@
             background: #000;
             color: #ccc;
             min-height: 100vh;
-            padding: 40px;
-            line-height: 1.5;
-        }
-
-        .frame-wrapper {
-            max-width: 940px;
-            margin: 0 auto;
             padding: 20px;
-            position: relative;
-            background: #000;
-            border: 4px solid #fff;
-            box-shadow:
-                inset 0 0 0 2px #000,
-                inset 0 0 0 4px #888,
-                inset 0 0 0 6px #000,
-                inset 0 0 0 10px #fff,
-                0 0 0 2px #444,
-                0 0 20px rgba(255,255,255,0.1);
-            transition: transform 0.1s ease-out, box-shadow 0.1s ease-out;
-            transform-origin: center top;
-        }
-
-        .frame-wrapper::before {
-            content: '';
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            right: 12px;
-            bottom: 12px;
-            border: 1px solid #333;
-            pointer-events: none;
+            line-height: 1.5;
         }
 
         .container {
@@ -566,7 +537,6 @@
     </style>
 </head>
 <body>
-    <div class="frame-wrapper" id="frameWrapper">
     <div class="container">
         <div class="logo">
             <div class="logo-h">
@@ -667,7 +637,6 @@
         <div class="credits">
             Created by Matt Donahue, William Turton, Ryan Scheuer, and Johnny Hamcheck
         </div>
-    </div>
     </div>
 
     <script>
@@ -1133,32 +1102,6 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             addPiece();
-
-            // Scroll-based frame scaling
-            const frameWrapper = document.getElementById('frameWrapper');
-            let lastScrollY = 0;
-
-            window.addEventListener('scroll', function() {
-                const scrollY = window.scrollY;
-                const maxScroll = 500;
-                const scrollProgress = Math.min(scrollY / maxScroll, 1);
-
-                // Scale down slightly as user scrolls, creating depth effect
-                const scale = 1 - (scrollProgress * 0.03);
-                const shadowIntensity = 1 + (scrollProgress * 0.5);
-
-                frameWrapper.style.transform = `scale(${scale})`;
-                frameWrapper.style.boxShadow = `
-                    inset 0 0 0 2px #000,
-                    inset 0 0 0 4px #888,
-                    inset 0 0 0 6px #000,
-                    inset 0 0 0 10px #fff,
-                    0 0 0 2px #444,
-                    0 ${4 * shadowIntensity}px ${20 * shadowIntensity}px rgba(255,255,255,${0.1 * shadowIntensity})
-                `;
-
-                lastScrollY = scrollY;
-            });
         });
     </script>
 </body>
