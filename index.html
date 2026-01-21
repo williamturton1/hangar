@@ -1065,7 +1065,11 @@
                 if (spacingMode === 'custom') {
                     const customSpacingValue = parseMixedNumber(document.getElementById('customSpacing').value);
                     spacing = isNaN(customSpacingValue) ? 12 : toInches(customSpacingValue);
-                    effectiveWallWidth = wallWidthIn || Math.max(totalPiecesWidth + spacing * (pieces.length - 1) + 40, 80);
+                    // Total width of pieces plus spacing between them
+                    const totalContentWidth = totalPiecesWidth + spacing * (pieces.length - 1);
+                    effectiveWallWidth = wallWidthIn || Math.max(totalContentWidth + 40, 80);
+                    // Center the group: edge spacing is (wall - content) / 2
+                    edgeSpacing = (effectiveWallWidth - totalContentWidth) / 2;
                 } else {
                     effectiveWallWidth = wallWidthIn || Math.max(totalPiecesWidth + 60, 120);
                     const availableSpace = effectiveWallWidth - totalPiecesWidth;
@@ -1130,13 +1134,8 @@
             ctx.textAlign = 'center';
             ctx.fillText('FLOOR', canvasWidth / 2, canvasHeight - 6);
 
-            // Calculate starting X position
-            let currentX;
-            if (pieces.length > 1 && spacingMode === 'even') {
-                currentX = edgeSpacing * drawScale;
-            } else {
-                currentX = edgeSpacing * drawScale;
-            }
+            // Calculate starting X position (edgeSpacing centers content on wall)
+            let currentX = edgeSpacing * drawScale;
 
             // Draw center height reference line (dotted)
             const centerHeightY = canvasHeight - (centerHeight * drawScale);
