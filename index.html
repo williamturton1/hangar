@@ -781,6 +781,13 @@
                 <button id="unitCm" onclick="setUnit('cm')">Centimeters</button>
             </div>
 
+            <label>Hardware Type</label>
+            <div class="unit-toggle" style="margin-bottom: 16px;">
+                <button class="active" id="hwNails" onclick="setHardwareType('nails')">Nails</button>
+                <button id="hwWire" onclick="setHardwareType('wire')">Wire</button>
+                <button id="hwCleat" onclick="setHardwareType('cleat')">Cleat</button>
+            </div>
+
             <div class="settings-row">
                 <div class="input-field">
                     <label>Center Height from Floor</label>
@@ -816,13 +823,13 @@
             <h2>Pictures</h2>
             <div id="piecesContainer"></div>
             <button class="btn-add" onclick="addPiece()">+ Add Another Piece</button>
-            <button class="btn btn-full" onclick="calculate()">Calculate Nail Positions</button>
+            <button class="btn btn-full" onclick="calculate()">Calculate Positions</button>
         </div>
 
         <!-- Results -->
         <div id="results" class="hidden">
             <div class="card">
-                <h2>Nail Placement Guide</h2>
+                <h2 id="resultsHeader">Placement Guide</h2>
                 <div id="resultsContainer"></div>
             </div>
 
@@ -867,6 +874,9 @@
         let pieces = [];
         let spacingMode = 'even'; // 'even' or 'custom'
         let viewMode = 'full'; // 'full' or 'nails'
+        let hardwareType = 'nails'; // 'nails', 'wire', or 'cleat'
+        let verificationErrors = 0;
+        const MAX_VERIFICATION_ERRORS = 3;
         const CM_PER_INCH = 2.54;
 
         function setSpacingMode(mode) {
@@ -874,6 +884,49 @@
             document.getElementById('spacingEven').classList.toggle('active', mode === 'even');
             document.getElementById('spacingCustom').classList.toggle('active', mode === 'custom');
             document.getElementById('customSpacingInput').classList.toggle('visible', mode === 'custom');
+        }
+
+        function setHardwareType(type) {
+            hardwareType = type;
+            document.getElementById('hwNails').classList.toggle('active', type === 'nails');
+            document.getElementById('hwWire').classList.toggle('active', type === 'wire');
+            document.getElementById('hwCleat').classList.toggle('active', type === 'cleat');
+            // Rebuild all piece cards with new hardware inputs
+            rebuildPieceCards();
+        }
+
+        function rebuildPieceCards() {
+            const container = document.getElementById('piecesContainer');
+            const existingCards = container.querySelectorAll('.piece-card');
+            const savedData = [];
+
+            // Save existing width/height data
+            existingCards.forEach(card => {
+                savedData.push({
+                    width: card.querySelector('[data-field="width"]')?.value || '',
+                    height: card.querySelector('[data-field="height"]')?.value || ''
+                });
+            });
+
+            // Clear and rebuild
+            container.innerHTML = '';
+            pieceIdCounter = 0;
+
+            // Add back pieces with saved data
+            const count = savedData.length || 1;
+            for (let i = 0; i < count; i++) {
+                addPiece();
+                if (savedData[i]) {
+                    const cards = container.querySelectorAll('.piece-card');
+                    const card = cards[cards.length - 1];
+                    if (card.querySelector('[data-field="width"]')) {
+                        card.querySelector('[data-field="width"]').value = savedData[i].width;
+                    }
+                    if (card.querySelector('[data-field="height"]')) {
+                        card.querySelector('[data-field="height"]').value = savedData[i].height;
+                    }
+                }
+            }
         }
 
         function parseMixedNumber(str) {
@@ -961,6 +1014,55 @@
 
         let pieceIdCounter = 0;
 
+        function getHardwareInputs(pieceId) {
+            if (hardwareType === 'nails') {
+                return `
+                    <div class="input-row" style="margin-top: 12px;">
+                        <div class="input-field">
+                            <label>Hardware Span</label>
+                            <input type="text" class="dimension-input" data-piece="${pieceId}" data-field="span" placeholder="e.g., 16">
+                            <p class="help-text">Distance between hanging points</p>
+                        </div>
+                        <div class="input-field">
+                            <label>Hardware from Top</label>
+                            <input type="text" class="dimension-input" data-piece="${pieceId}" data-field="fromTop" placeholder="e.g., 4">
+                            <p class="help-text">Distance from top to hardware</p>
+                        </div>
+                    </div>
+                `;
+            } else if (hardwareType === 'wire') {
+                return `
+                    <div class="input-row" style="margin-top: 12px;">
+                        <div class="input-field">
+                            <label>Wire Length</label>
+                            <input type="text" class="dimension-input" data-piece="${pieceId}" data-field="wireLength" placeholder="e.g., 20">
+                            <p class="help-text">Total length of hanging wire</p>
+                        </div>
+                        <div class="input-field">
+                            <label>D-rings from Top</label>
+                            <input type="text" class="dimension-input" data-piece="${pieceId}" data-field="fromTop" placeholder="e.g., 4">
+                            <p class="help-text">Distance from top to D-ring attachment</p>
+                        </div>
+                    </div>
+                `;
+            } else if (hardwareType === 'cleat') {
+                return `
+                    <div class="input-row" style="margin-top: 12px;">
+                        <div class="input-field">
+                            <label>Number of Cleats</label>
+                            <input type="text" class="dimension-input" data-piece="${pieceId}" data-field="cleatCount" placeholder="e.g., 1 or 2">
+                            <p class="help-text">Cleats are evenly spaced from center</p>
+                        </div>
+                        <div class="input-field">
+                            <label>Cleat Bottom from Top</label>
+                            <input type="text" class="dimension-input" data-piece="${pieceId}" data-field="fromTop" placeholder="e.g., 6">
+                            <p class="help-text">Top of piece to bottom of cleat</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
         function addPiece() {
             const container = document.getElementById('piecesContainer');
             const pieceId = pieceIdCounter++;
@@ -984,18 +1086,7 @@
                         <input type="text" class="dimension-input" data-piece="${pieceId}" data-field="height" placeholder="e.g., 36 or 36 1/4">
                     </div>
                 </div>
-                <div class="input-row" style="margin-top: 12px;">
-                    <div class="input-field">
-                        <label>Hardware Span</label>
-                        <input type="text" class="dimension-input" data-piece="${pieceId}" data-field="span" placeholder="e.g., 16">
-                        <p class="help-text">Distance between hanging points</p>
-                    </div>
-                    <div class="input-field">
-                        <label>Hardware from Top</label>
-                        <input type="text" class="dimension-input" data-piece="${pieceId}" data-field="fromTop" placeholder="e.g., 4">
-                        <p class="help-text">Distance from top to hardware</p>
-                    </div>
-                </div>
+                ${getHardwareInputs(pieceId)}
             `;
             container.appendChild(pieceDiv);
             updatePieceNumbers();
@@ -1041,10 +1132,9 @@
                 const pieceId = card.id.replace('piece-', '');
                 const width = parseMixedNumber(card.querySelector(`[data-field="width"]`).value);
                 const height = parseMixedNumber(card.querySelector(`[data-field="height"]`).value);
-                const span = parseMixedNumber(card.querySelector(`[data-field="span"]`).value);
                 const fromTop = parseMixedNumber(card.querySelector(`[data-field="fromTop"]`).value);
 
-                if (isNaN(width) || isNaN(height) || isNaN(span) || isNaN(fromTop)) {
+                if (isNaN(width) || isNaN(height) || isNaN(fromTop)) {
                     alert(`Please fill in all fields for Piece ${i + 1}`);
                     hasError = true;
                     return;
@@ -1052,11 +1142,84 @@
 
                 const widthIn = toInches(width);
                 const heightIn = toInches(height);
-                const spanIn = toInches(span);
                 const fromTopIn = toInches(fromTop);
 
-                const pictureTop = centerHeight + (heightIn / 2);
-                const nailHeight = pictureTop - fromTopIn;
+                let spanIn, nailHeight, wireSag = 0, cleatCount = 1, cleatPositions = [];
+
+                if (hardwareType === 'nails') {
+                    const span = parseMixedNumber(card.querySelector(`[data-field="span"]`).value);
+                    if (isNaN(span)) {
+                        alert(`Please fill in hardware span for Piece ${i + 1}`);
+                        hasError = true;
+                        return;
+                    }
+                    spanIn = toInches(span);
+                    const pictureTop = centerHeight + (heightIn / 2);
+                    nailHeight = pictureTop - fromTopIn;
+
+                } else if (hardwareType === 'wire') {
+                    const wireLength = parseMixedNumber(card.querySelector(`[data-field="wireLength"]`).value);
+                    if (isNaN(wireLength)) {
+                        alert(`Please fill in wire length for Piece ${i + 1}`);
+                        hasError = true;
+                        return;
+                    }
+                    const wireLengthIn = toInches(wireLength);
+
+                    // Calculate span as closest whole number to 60% of width
+                    spanIn = Math.round(widthIn * 0.6);
+
+                    // Calculate wire sag using Pythagorean theorem
+                    // Wire forms a V when hung, each leg = wireLength/2
+                    // Horizontal distance from center to D-ring = span/2
+                    // Vertical sag = sqrt((wireLength/2)² - (span/2)²)
+                    const halfWire = wireLengthIn / 2;
+                    const halfSpan = spanIn / 2;
+
+                    if (halfWire <= halfSpan) {
+                        alert(`Wire length must be greater than span (${formatResult(spanIn)}) for Piece ${i + 1}`);
+                        hasError = true;
+                        return;
+                    }
+
+                    wireSag = Math.sqrt(halfWire * halfWire - halfSpan * halfSpan);
+
+                    // Calculate nail height accounting for wire sag
+                    // Top of picture = nailHeight - wireSag + fromTop
+                    // Center = top - height/2 = nailHeight - wireSag + fromTop - height/2
+                    // We want center = centerHeight
+                    // So: nailHeight = centerHeight + wireSag - fromTop + height/2
+                    const pictureTop = centerHeight + (heightIn / 2);
+                    nailHeight = pictureTop - fromTopIn + wireSag;
+
+                } else if (hardwareType === 'cleat') {
+                    const cleatCountVal = parseMixedNumber(card.querySelector(`[data-field="cleatCount"]`).value);
+                    if (isNaN(cleatCountVal) || cleatCountVal < 1) {
+                        alert(`Please enter a valid number of cleats for Piece ${i + 1}`);
+                        hasError = true;
+                        return;
+                    }
+                    cleatCount = Math.round(cleatCountVal);
+
+                    // For cleats, span represents the total spread of cleats
+                    // Cleats are evenly spaced from center
+                    // Use 60% of width as the total cleat spread
+                    spanIn = Math.round(widthIn * 0.6);
+
+                    // Calculate cleat positions (distance from center)
+                    if (cleatCount === 1) {
+                        cleatPositions = [0]; // Single cleat at center
+                    } else {
+                        // Evenly space cleats across the span
+                        const spacing = spanIn / (cleatCount - 1);
+                        for (let c = 0; c < cleatCount; c++) {
+                            cleatPositions.push(-spanIn/2 + c * spacing);
+                        }
+                    }
+
+                    const pictureTop = centerHeight + (heightIn / 2);
+                    nailHeight = pictureTop - fromTopIn;
+                }
 
                 pieces.push({
                     index: i + 1,
@@ -1065,11 +1228,29 @@
                     span: spanIn,
                     fromTop: fromTopIn,
                     nailHeight: nailHeight,
-                    centerHeight: centerHeight
+                    centerHeight: centerHeight,
+                    hardwareType: hardwareType,
+                    wireSag: wireSag,
+                    cleatCount: cleatCount,
+                    cleatPositions: cleatPositions
                 });
             });
 
             if (hasError) return;
+
+            // Verify calculations
+            if (!verifyCalculations(centerHeight, pieceCards)) {
+                verificationErrors++;
+                console.warn(`Verification failed (${verificationErrors}/${MAX_VERIFICATION_ERRORS})`);
+
+                if (verificationErrors >= MAX_VERIFICATION_ERRORS) {
+                    alert('Error: Calculation verification failed multiple times. The page will reload to reset.');
+                    location.reload();
+                    return;
+                }
+            } else {
+                verificationErrors = 0; // Reset on successful verification
+            }
 
             renderResults();
             drawDiagram(wallWidth ? toInches(wallWidth) : null, wallHeight ? toInches(wallHeight) : null);
@@ -1078,31 +1259,141 @@
             document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
         }
 
+        function verifyCalculations(centerHeight, pieceCards) {
+            // Recalculate and verify each piece's math
+            const tolerance = 0.001; // Allow tiny floating point differences
+
+            for (let i = 0; i < pieces.length; i++) {
+                const piece = pieces[i];
+                const card = pieceCards[i];
+
+                const widthIn = piece.width;
+                const heightIn = piece.height;
+                const fromTopIn = piece.fromTop;
+                const pictureTop = centerHeight + (heightIn / 2);
+
+                let expectedNailHeight;
+
+                if (piece.hardwareType === 'wire') {
+                    // Verify wire sag calculation
+                    const halfWire = card.querySelector(`[data-field="wireLength"]`) ?
+                        toInches(parseMixedNumber(card.querySelector(`[data-field="wireLength"]`).value)) / 2 :
+                        piece.wireSag; // fallback
+                    const halfSpan = piece.span / 2;
+                    const expectedWireSag = Math.sqrt(halfWire * halfWire - halfSpan * halfSpan);
+                    expectedNailHeight = pictureTop - fromTopIn + expectedWireSag;
+
+                    if (Math.abs(piece.wireSag - expectedWireSag) > tolerance) {
+                        console.error(`Wire sag mismatch for piece ${i+1}: ${piece.wireSag} vs ${expectedWireSag}`);
+                        return false;
+                    }
+                } else {
+                    // Nails or cleat - simple calculation
+                    expectedNailHeight = pictureTop - fromTopIn;
+                }
+
+                if (Math.abs(piece.nailHeight - expectedNailHeight) > tolerance) {
+                    console.error(`Nail height mismatch for piece ${i+1}: ${piece.nailHeight} vs ${expectedNailHeight}`);
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         function renderResults() {
             const container = document.getElementById('resultsContainer');
             container.innerHTML = '';
 
+            // Update header based on hardware type
+            const header = document.getElementById('resultsHeader');
+            if (hardwareType === 'nails') {
+                header.textContent = 'Nail Placement Guide';
+            } else if (hardwareType === 'wire') {
+                header.textContent = 'Wire Hanging Guide';
+            } else if (hardwareType === 'cleat') {
+                header.textContent = 'Cleat Placement Guide';
+            }
+
             pieces.forEach((piece, i) => {
-                const html = `
-                    <div class="piece-card">
-                        <h3>Piece ${piece.index}</h3>
-                        <div class="result-item">
-                            <h3>Nail Height from Floor</h3>
-                            <div class="result-value">${formatResult(piece.nailHeight)}</div>
-                            <div class="note">Measure up from the floor</div>
-                        </div>
-                        <div class="input-row">
-                            <div class="result-item" style="flex:1">
-                                <h3>Distance Between Nails</h3>
-                                <div class="result-value">${formatResult(piece.span)}</div>
+                let html = '';
+
+                if (piece.hardwareType === 'nails') {
+                    html = `
+                        <div class="piece-card">
+                            <h3>Piece ${piece.index}</h3>
+                            <div class="result-item">
+                                <h3>Nail Height from Floor</h3>
+                                <div class="result-value">${formatResult(piece.nailHeight)}</div>
+                                <div class="note">Measure up from the floor</div>
                             </div>
-                            <div class="result-item" style="flex:1">
-                                <h3>Each Nail from Center</h3>
-                                <div class="result-value">${formatResult(piece.span / 2)}</div>
+                            <div class="input-row">
+                                <div class="result-item" style="flex:1">
+                                    <h3>Distance Between Nails</h3>
+                                    <div class="result-value">${formatResult(piece.span)}</div>
+                                </div>
+                                <div class="result-item" style="flex:1">
+                                    <h3>Each Nail from Center</h3>
+                                    <div class="result-value">${formatResult(piece.span / 2)}</div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                } else if (piece.hardwareType === 'wire') {
+                    html = `
+                        <div class="piece-card">
+                            <h3>Piece ${piece.index}</h3>
+                            <div class="result-item">
+                                <h3>Nail Height from Floor</h3>
+                                <div class="result-value">${formatResult(piece.nailHeight)}</div>
+                                <div class="note">Single nail at center of piece</div>
+                            </div>
+                            <div class="input-row">
+                                <div class="result-item" style="flex:1">
+                                    <h3>Calculated Span</h3>
+                                    <div class="result-value">${formatResult(piece.span)}</div>
+                                    <div class="note">60% of width</div>
+                                </div>
+                                <div class="result-item" style="flex:1">
+                                    <h3>Wire Sag</h3>
+                                    <div class="result-value">${formatResult(piece.wireSag)}</div>
+                                    <div class="note">Wire drop from nail</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else if (piece.hardwareType === 'cleat') {
+                    let cleatDetails = '';
+                    if (piece.cleatCount === 1) {
+                        cleatDetails = `<div class="note">Single cleat at center</div>`;
+                    } else {
+                        const cleatSpacing = piece.span / (piece.cleatCount - 1);
+                        cleatDetails = `<div class="note">${piece.cleatCount} cleats, ${formatResult(cleatSpacing)} apart</div>`;
+                    }
+
+                    html = `
+                        <div class="piece-card">
+                            <h3>Piece ${piece.index}</h3>
+                            <div class="result-item">
+                                <h3>Cleat Height from Floor</h3>
+                                <div class="result-value">${formatResult(piece.nailHeight)}</div>
+                                <div class="note">Top edge of wall cleat</div>
+                            </div>
+                            <div class="input-row">
+                                <div class="result-item" style="flex:1">
+                                    <h3>Cleat Spread</h3>
+                                    <div class="result-value">${formatResult(piece.span)}</div>
+                                    ${cleatDetails}
+                                </div>
+                                <div class="result-item" style="flex:1">
+                                    <h3>Each from Center</h3>
+                                    <div class="result-value">${formatResult(piece.span / 2)}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
                 container.innerHTML += html;
             });
         }
@@ -1224,7 +1515,7 @@
                 const picTop = picBottom - picHeight;
                 const picCenterX = currentX + picWidth / 2;
 
-                // Nail positions (calculated for both modes)
+                // Hardware position calculations
                 const nailY = canvasHeight - (piece.nailHeight * drawScale);
                 const nailOffset = (piece.span / 2) * drawScale;
                 const nail1X = picCenterX - nailOffset;
@@ -1256,76 +1547,182 @@
                     ctx.fillText(piece.index.toString(), picCenterX, picTop + picHeight / 2);
                 }
 
-                // Dotted line connecting nails
-                ctx.strokeStyle = '#f00';
-                ctx.lineWidth = 2;
-                ctx.setLineDash([4, 4]);
-                ctx.beginPath();
-                ctx.moveTo(nail1X + circleRadius, nailY);
-                ctx.lineTo(nail2X - circleRadius, nailY);
-                ctx.stroke();
-                ctx.setLineDash([]);
+                // Draw hardware based on type
+                if (piece.hardwareType === 'wire') {
+                    // WIRE: Single nail at center with wire visualization
 
-                // Span label between nails (shown by default now)
-                const spanLabelX = (nail1X + nail2X) / 2;
-                ctx.fillStyle = '#000';
-                ctx.fillRect(spanLabelX - 26, nailY - 20, 52, 14);
-                ctx.fillStyle = '#0f0';
-                ctx.font = 'bold 11px monospace';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(formatResult(piece.span), spanLabelX, nailY - 12);
+                    // Draw wire (curved line showing sag)
+                    const wireAttachY = picTop + (piece.fromTop * drawScale);
+                    const wireSagY = wireAttachY - (piece.wireSag * drawScale);
 
-                // Left nail - red circle with X
-                ctx.strokeStyle = '#f00';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.arc(nail1X, nailY, circleRadius, 0, Math.PI * 2);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(nail1X - xSize, nailY - xSize);
-                ctx.lineTo(nail1X + xSize, nailY + xSize);
-                ctx.moveTo(nail1X + xSize, nailY - xSize);
-                ctx.lineTo(nail1X - xSize, nailY + xSize);
-                ctx.stroke();
+                    ctx.strokeStyle = '#888';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(nail1X, wireAttachY);
+                    ctx.quadraticCurveTo(picCenterX, wireSagY + 10, nail2X, wireAttachY);
+                    ctx.stroke();
 
-                // Right nail - red circle with X
-                ctx.beginPath();
-                ctx.arc(nail2X, nailY, circleRadius, 0, Math.PI * 2);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(nail2X - xSize, nailY - xSize);
-                ctx.lineTo(nail2X + xSize, nailY + xSize);
-                ctx.moveTo(nail2X + xSize, nailY - xSize);
-                ctx.lineTo(nail2X - xSize, nailY + xSize);
-                ctx.stroke();
+                    // Single nail at center
+                    ctx.strokeStyle = '#f00';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(picCenterX, nailY, circleRadius, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(picCenterX - xSize, nailY - xSize);
+                    ctx.lineTo(picCenterX + xSize, nailY + xSize);
+                    ctx.moveTo(picCenterX + xSize, nailY - xSize);
+                    ctx.lineTo(picCenterX - xSize, nailY + xSize);
+                    ctx.stroke();
 
-                // Store hitbox for hover (the line between nails)
-                nailHitboxes.push({
-                    x1: nail1X,
-                    x2: nail2X,
-                    y: nailY,
-                    span: piece.span
-                });
+                    // Wire sag label
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(picCenterX - 30, nailY - 25, 60, 14);
+                    ctx.fillStyle = '#0f0';
+                    ctx.font = 'bold 10px monospace';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('sag: ' + formatResult(piece.wireSag), picCenterX, nailY - 17);
 
-                // Nail height label (left side)
+                    // Store hitbox
+                    nailHitboxes.push({
+                        x1: picCenterX - circleRadius,
+                        x2: picCenterX + circleRadius,
+                        y: nailY,
+                        span: 0
+                    });
+
+                } else if (piece.hardwareType === 'cleat') {
+                    // CLEAT: Multiple cleat positions shown as rectangles
+                    const cleatWidth = 16;
+                    const cleatHeight = 6;
+
+                    piece.cleatPositions.forEach((pos, idx) => {
+                        const cleatX = picCenterX + (pos * drawScale);
+
+                        // Cleat rectangle
+                        ctx.fillStyle = '#f00';
+                        ctx.fillRect(cleatX - cleatWidth/2, nailY - cleatHeight/2, cleatWidth, cleatHeight);
+
+                        // Cleat border
+                        ctx.strokeStyle = '#900';
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(cleatX - cleatWidth/2, nailY - cleatHeight/2, cleatWidth, cleatHeight);
+                    });
+
+                    // Dotted line connecting cleats if more than one
+                    if (piece.cleatPositions.length > 1) {
+                        const firstCleatX = picCenterX + (piece.cleatPositions[0] * drawScale);
+                        const lastCleatX = picCenterX + (piece.cleatPositions[piece.cleatPositions.length - 1] * drawScale);
+
+                        ctx.strokeStyle = '#f00';
+                        ctx.lineWidth = 2;
+                        ctx.setLineDash([4, 4]);
+                        ctx.beginPath();
+                        ctx.moveTo(firstCleatX + cleatWidth/2, nailY);
+                        ctx.lineTo(lastCleatX - cleatWidth/2, nailY);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                    }
+
+                    // Span label (total cleat span)
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(picCenterX - 30, nailY - 22, 60, 14);
+                    ctx.fillStyle = '#0f0';
+                    ctx.font = 'bold 11px monospace';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(piece.cleatCount + ' cleat' + (piece.cleatCount > 1 ? 's' : ''), picCenterX, nailY - 14);
+
+                    // Store hitbox
+                    nailHitboxes.push({
+                        x1: picCenterX - (piece.span/2 * drawScale),
+                        x2: picCenterX + (piece.span/2 * drawScale),
+                        y: nailY,
+                        span: piece.span
+                    });
+
+                } else {
+                    // NAILS: Two nails with span between them (default)
+
+                    // Dotted line connecting nails
+                    ctx.strokeStyle = '#f00';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([4, 4]);
+                    ctx.beginPath();
+                    ctx.moveTo(nail1X + circleRadius, nailY);
+                    ctx.lineTo(nail2X - circleRadius, nailY);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+
+                    // Span label between nails
+                    const spanLabelX = (nail1X + nail2X) / 2;
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(spanLabelX - 26, nailY - 20, 52, 14);
+                    ctx.fillStyle = '#0f0';
+                    ctx.font = 'bold 11px monospace';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(formatResult(piece.span), spanLabelX, nailY - 12);
+
+                    // Left nail - red circle with X
+                    ctx.strokeStyle = '#f00';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(nail1X, nailY, circleRadius, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(nail1X - xSize, nailY - xSize);
+                    ctx.lineTo(nail1X + xSize, nailY + xSize);
+                    ctx.moveTo(nail1X + xSize, nailY - xSize);
+                    ctx.lineTo(nail1X - xSize, nailY + xSize);
+                    ctx.stroke();
+
+                    // Right nail - red circle with X
+                    ctx.beginPath();
+                    ctx.arc(nail2X, nailY, circleRadius, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(nail2X - xSize, nailY - xSize);
+                    ctx.lineTo(nail2X + xSize, nailY + xSize);
+                    ctx.moveTo(nail2X + xSize, nailY - xSize);
+                    ctx.lineTo(nail2X - xSize, nailY + xSize);
+                    ctx.stroke();
+
+                    // Store hitbox for hover
+                    nailHitboxes.push({
+                        x1: nail1X,
+                        x2: nail2X,
+                        y: nailY,
+                        span: piece.span
+                    });
+                }
+
+                // Height label (left side) - shown for all hardware types
                 ctx.fillStyle = '#000';
                 ctx.fillRect(2, nailY - 8, 58, 16);
                 ctx.fillStyle = '#0f0';
                 ctx.font = 'bold 12px monospace';
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'middle';
+                const heightLabel = piece.hardwareType === 'cleat' ? 'cleat' : 'nail';
                 ctx.fillText(formatResult(piece.nailHeight), 5, nailY);
 
-                // In nails-only mode, show distance from left wall to first nail
+                // In hardware-only mode, show distance from left wall to first hardware point
                 if (viewMode === 'nails') {
-                    const distFromLeft = nail1X;
-                    // Distance from wall corner to first nail
+                    let firstHwX = nail1X;
+                    if (piece.hardwareType === 'wire') {
+                        firstHwX = picCenterX;
+                    } else if (piece.hardwareType === 'cleat' && piece.cleatPositions.length > 0) {
+                        firstHwX = picCenterX + (piece.cleatPositions[0] * drawScale);
+                    }
+
+                    const distFromLeft = firstHwX;
                     ctx.strokeStyle = '#666';
                     ctx.lineWidth = 1;
                     ctx.beginPath();
                     ctx.moveTo(2, nailY + 20);
-                    ctx.lineTo(nail1X, nailY + 20);
+                    ctx.lineTo(firstHwX, nailY + 20);
                     ctx.stroke();
                     // Label
                     ctx.fillStyle = '#000';
@@ -1333,7 +1730,7 @@
                     ctx.fillStyle = '#888';
                     ctx.font = '8px monospace';
                     ctx.textAlign = 'center';
-                    ctx.fillText(formatResult(nail1X / drawScale), distFromLeft / 2, nailY + 31);
+                    ctx.fillText(formatResult(firstHwX / drawScale), distFromLeft / 2, nailY + 31);
                 }
 
                 // Store positions for spacing indicators
