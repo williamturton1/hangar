@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hangar - Picture Hanging Calculator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'SF Mono', 'Consolas', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            background: #2f2f2f;
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 8px;
+            font-size: 2.2rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            color: #a0a0a0;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1rem;
+        }
+
+        .card {
+            background: #3d3d3d;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+            border: 1px solid #4a4a4a;
+        }
+
+        .card h2 {
+            color: #ffffff;
+            margin-bottom: 16px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #4a4a4a;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .input-field {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            color: #b0b0b0;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #555;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: #2a2a2a;
+            color: #e0e0e0;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #10a37f;
+        }
+
+        input::placeholder {
+            color: #666;
+        }
+
+        .unit-toggle {
+            display: flex;
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 3px;
+            margin-bottom: 16px;
+            border: 1px solid #4a4a4a;
+        }
+
+        .unit-toggle button {
+            flex: 1;
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: 500;
+            color: #a0a0a0;
+            transition: all 0.2s;
+        }
+
+        .unit-toggle button.active {
+            background: #10a37f;
+            color: white;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            background: #10a37f;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: #0d8a6a;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .btn-secondary {
+            background: #4a4a4a;
+        }
+
+        .btn-secondary:hover {
+            background: #555;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .piece-card {
+            background: #353535;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 12px;
+            border: 1px solid #4a4a4a;
+        }
+
+        .piece-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .piece-card h3 {
+            color: #10a37f;
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .btn-remove {
+            background: #4a4a4a;
+            color: #ff6b6b;
+            border: 1px solid #ff6b6b;
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-remove:hover {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .btn-add {
+            background: transparent;
+            border: 2px dashed #555;
+            color: #888;
+            padding: 16px;
+            width: 100%;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-bottom: 16px;
+            transition: all 0.2s;
+        }
+
+        .btn-add:hover {
+            border-color: #10a37f;
+            color: #10a37f;
+        }
+
+        .result-value {
+            color: #00ff88;
+            font-size: 1.6rem;
+            font-weight: 700;
+            font-family: 'SF Mono', 'Consolas', monospace;
+        }
+
+        .result-item {
+            background: #353535;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 3px solid #10a37f;
+        }
+
+        .result-item h3 {
+            color: #a0a0a0;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .result-item .note {
+            color: #777;
+            font-size: 0.85rem;
+            margin-top: 6px;
+        }
+
+        .help-text {
+            font-size: 0.8rem;
+            color: #777;
+            margin-top: 4px;
+        }
+
+        .wall-diagram {
+            position: relative;
+            background: linear-gradient(to bottom, #d4c4b0 0%, #c9b99a 100%);
+            border: 3px solid #5a4a3a;
+            border-radius: 4px;
+            margin: 20px auto;
+            width: 100%;
+            max-width: 600px;
+            height: 450px;
+            overflow: hidden;
+        }
+
+        .floor-line {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #3a2a1a;
+        }
+
+        /* 8-bit gilded frame */
+        .frame-8bit {
+            position: absolute;
+            image-rendering: pixelated;
+            background: #fff;
+        }
+
+        .frame-8bit::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            right: -8px;
+            bottom: -8px;
+            background:
+                linear-gradient(90deg, #d4a574 0%, #c49a6c 25%, #b8956a 50%, #d4a574 75%, #e6be8a 100%);
+            z-index: -1;
+            border: 4px solid #8b6914;
+            box-shadow:
+                inset 2px 2px 0 #f0d090,
+                inset -2px -2px 0 #a07830,
+                4px 4px 0 rgba(0,0,0,0.3);
+        }
+
+        .frame-8bit::after {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            border: 2px solid #c49a6c;
+            box-shadow: inset 1px 1px 0 #f0d090;
+        }
+
+        .nail {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            transform: translate(-50%, -50%);
+            z-index: 20;
+            font-size: 14px;
+            font-weight: bold;
+            color: #ff4444;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nail::before {
+            content: '✕';
+        }
+
+        .spacing-indicator {
+            position: absolute;
+            z-index: 18;
+        }
+
+        .spacing-line {
+            position: absolute;
+            height: 2px;
+            background: #ff6b6b;
+        }
+
+        .spacing-label {
+            position: absolute;
+            background: #ff6b6b;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Consolas', monospace;
+            white-space: nowrap;
+            transform: translateX(-50%);
+        }
+
+        .diagram-label {
+            position: absolute;
+            background: #10a37f;
+            color: #00ff88;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            font-family: 'SF Mono', 'Consolas', monospace;
+            white-space: nowrap;
+            z-index: 30;
+            border: 1px solid #00ff88;
+        }
+
+        .diagram-measurement {
+            position: absolute;
+            background: rgba(0,0,0,0.7);
+            z-index: 15;
+        }
+
+        .floor-label {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: #3a2a1a;
+            color: #d4c4b0;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .center-line {
+            position: absolute;
+            top: 10px;
+            bottom: 4px;
+            width: 2px;
+            background: repeating-linear-gradient(
+                to bottom,
+                #ff6b6b 0px,
+                #ff6b6b 6px,
+                transparent 6px,
+                transparent 12px
+            );
+            z-index: 5;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .center-label {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff6b6b;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            white-space: nowrap;
+            z-index: 25;
+        }
+
+        .settings-row {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .optional-tag {
+            font-size: 0.75rem;
+            color: #666;
+            font-weight: normal;
+        }
+
+        @media (max-width: 600px) {
+            .input-row, .settings-row {
+                flex-direction: column;
+            }
+            .piece-count-btn {
+                width: 45px;
+                height: 45px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Hangar</h1>
+        <p class="subtitle">Picture Hanging Calculator</p>
+
+        <div class="card">
+            <h2>Settings</h2>
+
+            <div class="unit-toggle">
+                <button class="active" id="unitInches" onclick="setUnit('inches')">Inches</button>
+                <button id="unitCm" onclick="setUnit('cm')">Centimeters</button>
+            </div>
+
+            <div class="settings-row">
+                <div class="input-field">
+                    <label>Center Height from Floor</label>
+                    <input type="text" id="centerHeight" value="60" placeholder="60">
+                    <p class="help-text">Standard gallery height is 60"</p>
+                </div>
+                <div class="input-field">
+                    <label>Wall Width <span class="optional-tag">(optional)</span></label>
+                    <input type="text" id="wallWidth" placeholder="e.g., 120 or 10 ft">
+                </div>
+                <div class="input-field">
+                    <label>Wall Height <span class="optional-tag">(optional)</span></label>
+                    <input type="text" id="wallHeight" placeholder="e.g., 96 or 8 ft">
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Pictures</h2>
+            <div id="piecesContainer"></div>
+            <button class="btn-add" onclick="addPiece()">+ Add Another Piece</button>
+            <button class="btn btn-full" onclick="calculate()">Calculate Nail Positions</button>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="hidden">
+            <div class="card">
+                <h2>Nail Placement Guide</h2>
+                <div id="resultsContainer"></div>
+            </div>
+
+            <div class="card">
+                <h2>Wall Diagram</h2>
+                <div class="wall-diagram" id="wallDiagram">
+                    <div class="floor-line"></div>
+                    <div class="floor-label">Floor</div>
+                </div>
+            </div>
+
+            <button class="btn btn-secondary btn-full" onclick="startOver()">Start Over</button>
+        </div>
+    </div>
+
+    <script>
+        let currentUnit = 'inches';
+        let pieceCount = 1;
+        let pieces = [];
+        const CM_PER_INCH = 2.54;
+
+        // Parse mixed number input like "3 1/2" or "12 3/4" or "6" or "6.5"
+        function parseMixedNumber(str) {
+            if (!str || str.trim() === '') return NaN;
+            str = str.trim().toLowerCase();
+
+            // Handle feet notation like "5 ft" or "5'"
+            if (str.includes('ft') || str.includes("'")) {
+                const ftMatch = str.match(/^([\d.]+)\s*(?:ft|')?\s*(?:([\d.]+)\s*(?:in|")?)?\s*$/);
+                if (ftMatch) {
+                    const feet = parseFloat(ftMatch[1]) || 0;
+                    const inches = parseFloat(ftMatch[2]) || 0;
+                    return feet * 12 + inches;
+                }
+            }
+
+            // Handle mixed number like "3 1/2"
+            const mixedMatch = str.match(/^(\d+)\s+(\d+)\/(\d+)$/);
+            if (mixedMatch) {
+                const whole = parseInt(mixedMatch[1]);
+                const num = parseInt(mixedMatch[2]);
+                const den = parseInt(mixedMatch[3]);
+                return whole + (num / den);
+            }
+
+            // Handle simple fraction like "1/2"
+            const fracMatch = str.match(/^(\d+)\/(\d+)$/);
+            if (fracMatch) {
+                return parseInt(fracMatch[1]) / parseInt(fracMatch[2]);
+            }
+
+            // Handle decimal or whole number
+            return parseFloat(str);
+        }
+
+        // Convert decimal inches to mixed number for tape measure
+        function toMixedNumber(decimal) {
+            if (isNaN(decimal)) return '--';
+
+            const isNegative = decimal < 0;
+            decimal = Math.abs(decimal);
+
+            const whole = Math.floor(decimal);
+            let remainder = decimal - whole;
+
+            // Round to nearest 1/16
+            const sixteenths = Math.round(remainder * 16);
+
+            if (sixteenths === 0) {
+                return (isNegative ? '-' : '') + whole + '"';
+            }
+            if (sixteenths === 16) {
+                return (isNegative ? '-' : '') + (whole + 1) + '"';
+            }
+
+            // Simplify fraction
+            let num = sixteenths;
+            let den = 16;
+
+            while (num % 2 === 0 && den % 2 === 0) {
+                num /= 2;
+                den /= 2;
+            }
+
+            if (whole === 0) {
+                return (isNegative ? '-' : '') + num + '/' + den + '"';
+            }
+            return (isNegative ? '-' : '') + whole + ' ' + num + '/' + den + '"';
+        }
+
+        function formatResult(inches) {
+            if (currentUnit === 'cm') {
+                return (inches * CM_PER_INCH).toFixed(1) + ' cm';
+            }
+            return toMixedNumber(inches);
+        }
+
+        function toInches(value) {
+            return currentUnit === 'cm' ? value / CM_PER_INCH : value;
+        }
+
+        function setUnit(unit) {
+            currentUnit = unit;
+            document.getElementById('unitInches').classList.toggle('active', unit === 'inches');
+            document.getElementById('unitCm').classList.toggle('active', unit === 'cm');
+
+            // Update placeholders
+            const inchPlaceholder = unit === 'inches' ? 'e.g., 24 or 24 1/2' : 'e.g., 61';
+            document.querySelectorAll('.dimension-input').forEach(input => {
+                input.placeholder = inchPlaceholder;
+            });
+        }
+
+        let pieceIdCounter = 0;
+
+        function addPiece() {
+            const container = document.getElementById('piecesContainer');
+            const pieceId = pieceIdCounter++;
+            const pieceCount = container.children.length + 1;
+
+            const pieceDiv = document.createElement('div');
+            pieceDiv.className = 'piece-card';
+            pieceDiv.id = `piece-${pieceId}`;
+            pieceDiv.innerHTML = `
+                <div class="piece-header">
+                    <h3>Piece ${pieceCount}</h3>
+                    <button class="btn-remove" onclick="removePiece(${pieceId})">Remove</button>
+                </div>
+                <div class="input-row">
+                    <div class="input-field">
+                        <label>Width</label>
+                        <input type="text" class="dimension-input" data-piece="${pieceId}" data-field="width" placeholder="e.g., 24 or 24 1/2">
+                    </div>
+                    <div class="input-field">
+                        <label>Height</label>
+                        <input type="text" class="dimension-input" data-piece="${pieceId}" data-field="height" placeholder="e.g., 36 or 36 1/4">
+                    </div>
+                </div>
+                <div class="input-row" style="margin-top: 12px;">
+                    <div class="input-field">
+                        <label>Hardware Span</label>
+                        <input type="text" class="dimension-input" data-piece="${pieceId}" data-field="span" placeholder="e.g., 16">
+                        <p class="help-text">Distance between hanging points</p>
+                    </div>
+                    <div class="input-field">
+                        <label>Hardware from Top</label>
+                        <input type="text" class="dimension-input" data-piece="${pieceId}" data-field="fromTop" placeholder="e.g., 4">
+                        <p class="help-text">Distance from top to hardware</p>
+                    </div>
+                </div>
+            `;
+            container.appendChild(pieceDiv);
+            updatePieceNumbers();
+        }
+
+        function removePiece(pieceId) {
+            const pieceDiv = document.getElementById(`piece-${pieceId}`);
+            if (pieceDiv) {
+                pieceDiv.remove();
+                updatePieceNumbers();
+                // If results are visible, recalculate
+                if (!document.getElementById('results').classList.contains('hidden')) {
+                    calculate();
+                }
+            }
+        }
+
+        function updatePieceNumbers() {
+            const container = document.getElementById('piecesContainer');
+            const pieces = container.querySelectorAll('.piece-card');
+            pieces.forEach((piece, index) => {
+                const h3 = piece.querySelector('h3');
+                if (h3) h3.textContent = `Piece ${index + 1}`;
+            });
+        }
+
+        function calculate() {
+            const container = document.getElementById('piecesContainer');
+            const pieceCards = container.querySelectorAll('.piece-card');
+
+            if (pieceCards.length === 0) {
+                alert('Please add at least one piece');
+                return;
+            }
+
+            const centerHeight = toInches(parseMixedNumber(document.getElementById('centerHeight').value)) || 60;
+            const wallWidth = parseMixedNumber(document.getElementById('wallWidth').value);
+            const wallHeight = parseMixedNumber(document.getElementById('wallHeight').value);
+
+            pieces = [];
+
+            let hasError = false;
+            pieceCards.forEach((card, i) => {
+                const pieceId = card.id.replace('piece-', '');
+                const width = parseMixedNumber(card.querySelector(`[data-field="width"]`).value);
+                const height = parseMixedNumber(card.querySelector(`[data-field="height"]`).value);
+                const span = parseMixedNumber(card.querySelector(`[data-field="span"]`).value);
+                const fromTop = parseMixedNumber(card.querySelector(`[data-field="fromTop"]`).value);
+
+                if (isNaN(width) || isNaN(height) || isNaN(span) || isNaN(fromTop)) {
+                    alert(`Please fill in all fields for Piece ${i + 1}`);
+                    hasError = true;
+                    return;
+                }
+
+                const widthIn = toInches(width);
+                const heightIn = toInches(height);
+                const spanIn = toInches(span);
+                const fromTopIn = toInches(fromTop);
+
+                const pictureTop = centerHeight + (heightIn / 2);
+                const nailHeight = pictureTop - fromTopIn;
+
+                pieces.push({
+                    index: i + 1,
+                    width: widthIn,
+                    height: heightIn,
+                    span: spanIn,
+                    fromTop: fromTopIn,
+                    nailHeight: nailHeight,
+                    centerHeight: centerHeight
+                });
+            });
+
+            if (hasError) return;
+
+            renderResults();
+            drawDiagram(wallWidth ? toInches(wallWidth) : null, wallHeight ? toInches(wallHeight) : null);
+
+            document.getElementById('results').classList.remove('hidden');
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function renderResults() {
+            const container = document.getElementById('resultsContainer');
+            container.innerHTML = '';
+
+            pieces.forEach((piece, i) => {
+                const html = `
+                    <div class="piece-card">
+                        <h3>Piece ${piece.index}</h3>
+                        <div class="result-item">
+                            <h3>Nail Height from Floor</h3>
+                            <div class="result-value">${formatResult(piece.nailHeight)}</div>
+                            <div class="note">Measure up from the floor</div>
+                        </div>
+                        <div class="input-row">
+                            <div class="result-item" style="flex:1">
+                                <h3>Distance Between Nails</h3>
+                                <div class="result-value">${formatResult(piece.span)}</div>
+                            </div>
+                            <div class="result-item" style="flex:1">
+                                <h3>Each Nail from Center</h3>
+                                <div class="result-value">${formatResult(piece.span / 2)}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += html;
+            });
+        }
+
+        function drawDiagram(wallWidthIn, wallHeightIn) {
+            const diagram = document.getElementById('wallDiagram');
+
+            // Clear previous
+            diagram.innerHTML = '<div class="floor-line"></div><div class="floor-label">Floor</div><div class="center-line"></div><div class="center-label">Center</div>';
+
+            // Calculate total width needed for all pieces
+            const totalPiecesWidth = pieces.reduce((sum, p) => sum + p.width, 0);
+            const spacing = pieces.length > 1 ? 12 : 0; // inches between pieces
+            const totalWidth = totalPiecesWidth + spacing * (pieces.length - 1);
+
+            // Determine diagram scale
+            const diagramWidth = diagram.offsetWidth || 600;
+            const diagramHeight = 450;
+
+            const effectiveWallHeight = wallHeightIn || 96;
+            const effectiveWallWidth = wallWidthIn || Math.max(totalWidth + 40, 80);
+
+            const scaleY = (diagramHeight - 20) / effectiveWallHeight;
+            const scaleX = (diagramWidth - 40) / effectiveWallWidth;
+            const scale = Math.min(scaleX, scaleY);
+
+            // Starting X position to center all pieces
+            let currentX = (diagramWidth - (totalWidth * scale)) / 2;
+
+            pieces.forEach((piece, i) => {
+                const picWidth = piece.width * scale;
+                const picHeight = piece.height * scale;
+                const picBottom = (piece.centerHeight - piece.height / 2) * scale;
+
+                // Create 8-bit frame
+                const frame = document.createElement('div');
+                frame.className = 'frame-8bit';
+                frame.style.width = picWidth + 'px';
+                frame.style.height = picHeight + 'px';
+                frame.style.left = currentX + 'px';
+                frame.style.bottom = picBottom + 'px';
+                diagram.appendChild(frame);
+
+                // Create nails
+                const nailY = diagramHeight - (piece.nailHeight * scale);
+                const centerX = currentX + picWidth / 2;
+                const nailOffset = (piece.span / 2) * scale;
+
+                // Left nail
+                const nail1 = document.createElement('div');
+                nail1.className = 'nail';
+                nail1.style.left = (centerX - nailOffset) + 'px';
+                nail1.style.top = nailY + 'px';
+                diagram.appendChild(nail1);
+
+                // Right nail
+                const nail2 = document.createElement('div');
+                nail2.className = 'nail';
+                nail2.style.left = (centerX + nailOffset) + 'px';
+                nail2.style.top = nailY + 'px';
+                diagram.appendChild(nail2);
+
+                // Height measurement label
+                const heightLabel = document.createElement('div');
+                heightLabel.className = 'diagram-label';
+                heightLabel.textContent = formatResult(piece.nailHeight);
+                heightLabel.style.left = (currentX - 5) + 'px';
+                heightLabel.style.top = nailY + 'px';
+                heightLabel.style.transform = 'translateX(-100%)';
+                diagram.appendChild(heightLabel);
+
+                // Span measurement label
+                const spanLabel = document.createElement('div');
+                spanLabel.className = 'diagram-label';
+                spanLabel.textContent = formatResult(piece.span);
+                spanLabel.style.left = centerX + 'px';
+                spanLabel.style.top = (nailY - 20) + 'px';
+                spanLabel.style.transform = 'translateX(-50%)';
+                diagram.appendChild(spanLabel);
+
+                // Span line
+                const spanLine = document.createElement('div');
+                spanLine.className = 'diagram-measurement';
+                spanLine.style.height = '2px';
+                spanLine.style.width = (nailOffset * 2) + 'px';
+                spanLine.style.left = (centerX - nailOffset) + 'px';
+                spanLine.style.top = (nailY - 8) + 'px';
+                diagram.appendChild(spanLine);
+
+                // Height line
+                const heightLine = document.createElement('div');
+                heightLine.className = 'diagram-measurement';
+                heightLine.style.width = '2px';
+                heightLine.style.height = (diagramHeight - nailY) + 'px';
+                heightLine.style.left = (currentX - 15) + 'px';
+                heightLine.style.bottom = '4px';
+                diagram.appendChild(heightLine);
+
+                // Store right edge for spacing calculation
+                piece.rightEdgeX = currentX + picWidth;
+                piece.leftEdgeX = currentX;
+                piece.picBottom = picBottom;
+                piece.picHeight = picHeight;
+
+                currentX += picWidth + spacing * scale;
+            });
+
+            // Draw spacing indicators between paintings
+            if (pieces.length > 1) {
+                for (let i = 0; i < pieces.length - 1; i++) {
+                    const leftPiece = pieces[i];
+                    const rightPiece = pieces[i + 1];
+
+                    const gapStart = leftPiece.rightEdgeX + 8; // Account for frame border
+                    const gapEnd = rightPiece.leftEdgeX - 8;
+                    const gapWidth = gapEnd - gapStart;
+
+                    // Calculate vertical position (middle of the gap area)
+                    const avgBottom = (leftPiece.picBottom + rightPiece.picBottom) / 2;
+                    const avgHeight = (leftPiece.picHeight + rightPiece.picHeight) / 2;
+                    const lineY = diagramHeight - avgBottom - avgHeight / 2;
+
+                    // Spacing line
+                    const spacingLine = document.createElement('div');
+                    spacingLine.className = 'spacing-line';
+                    spacingLine.style.width = gapWidth + 'px';
+                    spacingLine.style.left = gapStart + 'px';
+                    spacingLine.style.top = lineY + 'px';
+                    diagram.appendChild(spacingLine);
+
+                    // Spacing label
+                    const spacingLabel = document.createElement('div');
+                    spacingLabel.className = 'spacing-label';
+                    spacingLabel.textContent = formatResult(spacing);
+                    spacingLabel.style.left = (gapStart + gapWidth / 2) + 'px';
+                    spacingLabel.style.top = (lineY - 22) + 'px';
+                    diagram.appendChild(spacingLabel);
+                }
+            }
+        }
+
+        function startOver() {
+            pieces = [];
+            pieceIdCounter = 0;
+            document.getElementById('results').classList.add('hidden');
+            document.getElementById('piecesContainer').innerHTML = '';
+            addPiece(); // Start with one piece
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Initialize with one piece on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            addPiece();
+        });
+    </script>
+</body>
+</html>
