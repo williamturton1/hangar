@@ -13,8 +13,8 @@
 
         body {
             font-family: 'SF Mono', 'Consolas', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-            background: #2f2f2f;
-            color: #e0e0e0;
+            background: #000;
+            color: #ccc;
             min-height: 100vh;
             padding: 20px;
             line-height: 1.5;
@@ -26,36 +26,37 @@
         }
 
         h1 {
-            color: #ffffff;
+            color: #fff;
             text-align: center;
-            margin-bottom: 8px;
-            font-size: 2.2rem;
-            font-weight: 600;
-            letter-spacing: -0.5px;
+            margin-bottom: 4px;
+            font-size: 1.2rem;
+            font-weight: 400;
+            text-transform: lowercase;
         }
 
         .subtitle {
-            color: #a0a0a0;
+            color: #666;
             text-align: center;
             margin-bottom: 30px;
-            font-size: 1rem;
+            font-size: 0.8rem;
         }
 
         .card {
-            background: #3d3d3d;
-            border-radius: 12px;
+            background: #111;
             padding: 24px;
             margin-bottom: 16px;
-            border: 1px solid #4a4a4a;
+            border: 1px solid #333;
         }
 
         .card h2 {
-            color: #ffffff;
+            color: #fff;
             margin-bottom: 16px;
-            font-size: 1.1rem;
-            font-weight: 600;
+            font-size: 0.9rem;
+            font-weight: 400;
             padding-bottom: 12px;
-            border-bottom: 1px solid #4a4a4a;
+            border-bottom: 1px solid #333;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .input-group {
@@ -74,40 +75,37 @@
 
         label {
             display: block;
-            color: #b0b0b0;
+            color: #888;
             margin-bottom: 6px;
-            font-size: 0.9rem;
-            font-weight: 500;
+            font-size: 0.8rem;
         }
 
         input[type="text"],
         input[type="number"] {
             width: 100%;
             padding: 10px 14px;
-            border: 1px solid #555;
-            border-radius: 8px;
+            border: 1px solid #333;
             font-size: 1rem;
-            background: #2a2a2a;
-            color: #e0e0e0;
-            transition: border-color 0.2s;
+            background: #000;
+            color: #fff;
+            font-family: inherit;
         }
 
         input:focus {
             outline: none;
-            border-color: #10a37f;
+            border-color: #fff;
         }
 
         input::placeholder {
-            color: #666;
+            color: #444;
         }
 
         .unit-toggle {
             display: flex;
-            background: #2a2a2a;
-            border-radius: 8px;
-            padding: 3px;
+            background: #000;
+            padding: 0;
             margin-bottom: 16px;
-            border: 1px solid #4a4a4a;
+            border: 1px solid #333;
         }
 
         .unit-toggle button {
@@ -116,31 +114,29 @@
             border: none;
             background: transparent;
             cursor: pointer;
-            border-radius: 6px;
-            font-weight: 500;
-            color: #a0a0a0;
-            transition: all 0.2s;
+            font-weight: 400;
+            color: #666;
+            font-family: inherit;
         }
 
         .unit-toggle button.active {
-            background: #10a37f;
-            color: white;
+            background: #fff;
+            color: #000;
         }
 
         .btn {
             padding: 12px 20px;
-            background: #10a37f;
-            color: white;
+            background: #fff;
+            color: #000;
             border: none;
-            border-radius: 8px;
             font-size: 1rem;
-            font-weight: 500;
+            font-weight: 400;
             cursor: pointer;
-            transition: background 0.2s;
+            font-family: inherit;
         }
 
         .btn:hover {
-            background: #0d8a6a;
+            background: #ccc;
         }
 
         .btn-full {
@@ -148,11 +144,12 @@
         }
 
         .btn-secondary {
-            background: #4a4a4a;
+            background: #333;
+            color: #fff;
         }
 
         .btn-secondary:hover {
-            background: #555;
+            background: #444;
         }
 
         .hidden {
@@ -160,11 +157,10 @@
         }
 
         .piece-card {
-            background: #353535;
-            border-radius: 10px;
+            background: #0a0a0a;
             padding: 20px;
             margin-bottom: 12px;
-            border: 1px solid #4a4a4a;
+            border: 1px solid #333;
         }
 
         .piece-header {
@@ -175,85 +171,81 @@
         }
 
         .piece-card h3 {
-            color: #10a37f;
+            color: #fff;
             margin: 0;
-            font-size: 1rem;
+            font-size: 0.9rem;
+            font-weight: 400;
         }
 
         .btn-remove {
-            background: #4a4a4a;
-            color: #ff6b6b;
-            border: 1px solid #ff6b6b;
+            background: transparent;
+            color: #666;
+            border: 1px solid #333;
             padding: 4px 10px;
             font-size: 0.8rem;
-            border-radius: 4px;
             cursor: pointer;
-            transition: all 0.2s;
+            font-family: inherit;
         }
 
         .btn-remove:hover {
-            background: #ff6b6b;
-            color: white;
+            background: #333;
+            color: #fff;
         }
 
         .btn-add {
             background: transparent;
-            border: 2px dashed #555;
-            color: #888;
+            border: 1px dashed #333;
+            color: #666;
             padding: 16px;
             width: 100%;
-            border-radius: 10px;
             cursor: pointer;
             font-size: 1rem;
             margin-bottom: 16px;
-            transition: all 0.2s;
+            font-family: inherit;
         }
 
         .btn-add:hover {
-            border-color: #10a37f;
-            color: #10a37f;
+            border-color: #fff;
+            color: #fff;
         }
 
         .result-value {
-            color: #00ff88;
+            color: #0f0;
             font-size: 1.6rem;
             font-weight: 700;
-            font-family: 'SF Mono', 'Consolas', monospace;
         }
 
         .result-item {
-            background: #353535;
-            border-radius: 10px;
+            background: #0a0a0a;
             padding: 16px;
             margin-bottom: 12px;
-            border-left: 3px solid #10a37f;
+            border-left: 2px solid #fff;
         }
 
         .result-item h3 {
-            color: #a0a0a0;
+            color: #666;
             margin-bottom: 6px;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         .result-item .note {
-            color: #777;
-            font-size: 0.85rem;
+            color: #444;
+            font-size: 0.8rem;
             margin-top: 6px;
         }
 
         .help-text {
-            font-size: 0.8rem;
-            color: #777;
+            font-size: 0.75rem;
+            color: #444;
             margin-top: 4px;
         }
 
         .wall-diagram {
             position: relative;
-            background: linear-gradient(to bottom, #d4c4b0 0%, #c9b99a 100%);
-            border: 3px solid #5a4a3a;
-            border-radius: 4px;
+            background: #fff;
+            border: 1px solid #333;
             margin: 20px auto;
             width: 100%;
             max-width: 600px;
@@ -266,43 +258,15 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: 4px;
-            background: #3a2a1a;
+            height: 2px;
+            background: #000;
         }
 
-        /* 8-bit gilded frame */
         .frame-8bit {
             position: absolute;
             image-rendering: pixelated;
             background: #fff;
-        }
-
-        .frame-8bit::before {
-            content: '';
-            position: absolute;
-            top: -8px;
-            left: -8px;
-            right: -8px;
-            bottom: -8px;
-            background:
-                linear-gradient(90deg, #d4a574 0%, #c49a6c 25%, #b8956a 50%, #d4a574 75%, #e6be8a 100%);
-            z-index: -1;
-            border: 4px solid #8b6914;
-            box-shadow:
-                inset 2px 2px 0 #f0d090,
-                inset -2px -2px 0 #a07830,
-                4px 4px 0 rgba(0,0,0,0.3);
-        }
-
-        .frame-8bit::after {
-            content: '';
-            position: absolute;
-            top: -4px;
-            left: -4px;
-            right: -4px;
-            bottom: -4px;
-            border: 2px solid #c49a6c;
-            box-shadow: inset 1px 1px 0 #f0d090;
+            border: 3px solid #000;
         }
 
         .nail {
@@ -311,86 +275,73 @@
             height: 16px;
             transform: translate(-50%, -50%);
             z-index: 20;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: bold;
-            color: #ff4444;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            color: #000;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
         .nail::before {
-            content: '✕';
-        }
-
-        .spacing-indicator {
-            position: absolute;
-            z-index: 18;
+            content: 'x';
         }
 
         .spacing-line {
             position: absolute;
-            height: 2px;
-            background: #ff6b6b;
+            height: 1px;
+            background: #000;
         }
 
         .spacing-label {
             position: absolute;
-            background: #ff6b6b;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 0.7rem;
+            background: #000;
+            color: #0f0;
+            padding: 2px 4px;
+            font-size: 0.65rem;
             font-weight: 600;
-            font-family: 'SF Mono', 'Consolas', monospace;
             white-space: nowrap;
             transform: translateX(-50%);
         }
 
         .diagram-label {
             position: absolute;
-            background: #10a37f;
-            color: #00ff88;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
+            background: #000;
+            color: #0f0;
+            padding: 2px 4px;
+            font-size: 0.65rem;
             font-weight: 700;
-            font-family: 'SF Mono', 'Consolas', monospace;
             white-space: nowrap;
             z-index: 30;
-            border: 1px solid #00ff88;
         }
 
         .diagram-measurement {
             position: absolute;
-            background: rgba(0,0,0,0.7);
+            background: #000;
             z-index: 15;
         }
 
         .floor-label {
             position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background: #3a2a1a;
-            color: #d4c4b0;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: 600;
+            bottom: 6px;
+            right: 6px;
+            background: #000;
+            color: #fff;
+            padding: 2px 6px;
+            font-size: 0.7rem;
         }
 
         .center-line {
             position: absolute;
-            top: 10px;
+            top: 30px;
             bottom: 4px;
-            width: 2px;
+            width: 1px;
             background: repeating-linear-gradient(
                 to bottom,
-                #ff6b6b 0px,
-                #ff6b6b 6px,
-                transparent 6px,
-                transparent 12px
+                #000 0px,
+                #000 4px,
+                transparent 4px,
+                transparent 8px
             );
             z-index: 5;
             left: 50%;
@@ -399,15 +350,13 @@
 
         .center-label {
             position: absolute;
-            top: 10px;
+            top: 6px;
             left: 50%;
             transform: translateX(-50%);
-            background: #ff6b6b;
-            color: white;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            font-weight: 600;
+            background: #000;
+            color: #fff;
+            padding: 2px 6px;
+            font-size: 0.65rem;
             white-space: nowrap;
             z-index: 25;
         }
@@ -420,26 +369,30 @@
         }
 
         .optional-tag {
-            font-size: 0.75rem;
-            color: #666;
+            font-size: 0.7rem;
+            color: #444;
             font-weight: normal;
+        }
+
+        .credits {
+            text-align: center;
+            color: #333;
+            font-size: 0.6rem;
+            margin-top: 40px;
+            padding: 20px;
         }
 
         @media (max-width: 600px) {
             .input-row, .settings-row {
                 flex-direction: column;
             }
-            .piece-count-btn {
-                width: 45px;
-                height: 45px;
-            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Hangar</h1>
-        <p class="subtitle">Picture Hanging Calculator</p>
+        <h1>hangar</h1>
+        <p class="subtitle">picture hanging calculator</p>
 
         <div class="card">
             <h2>Settings</h2>
@@ -490,6 +443,10 @@
 
             <button class="btn btn-secondary btn-full" onclick="startOver()">Start Over</button>
         </div>
+
+        <div class="credits">
+            Created by Matt Donahue, William Turton, Ryan Scheuer, and Johnny Hamcheck
+        </div>
     </div>
 
     <script>
@@ -498,12 +455,10 @@
         let pieces = [];
         const CM_PER_INCH = 2.54;
 
-        // Parse mixed number input like "3 1/2" or "12 3/4" or "6" or "6.5"
         function parseMixedNumber(str) {
             if (!str || str.trim() === '') return NaN;
             str = str.trim().toLowerCase();
 
-            // Handle feet notation like "5 ft" or "5'"
             if (str.includes('ft') || str.includes("'")) {
                 const ftMatch = str.match(/^([\d.]+)\s*(?:ft|')?\s*(?:([\d.]+)\s*(?:in|")?)?\s*$/);
                 if (ftMatch) {
@@ -513,7 +468,6 @@
                 }
             }
 
-            // Handle mixed number like "3 1/2"
             const mixedMatch = str.match(/^(\d+)\s+(\d+)\/(\d+)$/);
             if (mixedMatch) {
                 const whole = parseInt(mixedMatch[1]);
@@ -522,17 +476,14 @@
                 return whole + (num / den);
             }
 
-            // Handle simple fraction like "1/2"
             const fracMatch = str.match(/^(\d+)\/(\d+)$/);
             if (fracMatch) {
                 return parseInt(fracMatch[1]) / parseInt(fracMatch[2]);
             }
 
-            // Handle decimal or whole number
             return parseFloat(str);
         }
 
-        // Convert decimal inches to mixed number for tape measure
         function toMixedNumber(decimal) {
             if (isNaN(decimal)) return '--';
 
@@ -542,7 +493,6 @@
             const whole = Math.floor(decimal);
             let remainder = decimal - whole;
 
-            // Round to nearest 1/16
             const sixteenths = Math.round(remainder * 16);
 
             if (sixteenths === 0) {
@@ -552,7 +502,6 @@
                 return (isNegative ? '-' : '') + (whole + 1) + '"';
             }
 
-            // Simplify fraction
             let num = sixteenths;
             let den = 16;
 
@@ -583,7 +532,6 @@
             document.getElementById('unitInches').classList.toggle('active', unit === 'inches');
             document.getElementById('unitCm').classList.toggle('active', unit === 'cm');
 
-            // Update placeholders
             const inchPlaceholder = unit === 'inches' ? 'e.g., 24 or 24 1/2' : 'e.g., 61';
             document.querySelectorAll('.dimension-input').forEach(input => {
                 input.placeholder = inchPlaceholder;
@@ -637,7 +585,6 @@
             if (pieceDiv) {
                 pieceDiv.remove();
                 updatePieceNumbers();
-                // If results are visible, recalculate
                 if (!document.getElementById('results').classList.contains('hidden')) {
                     calculate();
                 }
@@ -742,15 +689,12 @@
         function drawDiagram(wallWidthIn, wallHeightIn) {
             const diagram = document.getElementById('wallDiagram');
 
-            // Clear previous
             diagram.innerHTML = '<div class="floor-line"></div><div class="floor-label">Floor</div><div class="center-line"></div><div class="center-label">Center</div>';
 
-            // Calculate total width needed for all pieces
             const totalPiecesWidth = pieces.reduce((sum, p) => sum + p.width, 0);
-            const spacing = pieces.length > 1 ? 12 : 0; // inches between pieces
+            const spacing = pieces.length > 1 ? 12 : 0;
             const totalWidth = totalPiecesWidth + spacing * (pieces.length - 1);
 
-            // Determine diagram scale
             const diagramWidth = diagram.offsetWidth || 600;
             const diagramHeight = 450;
 
@@ -761,15 +705,16 @@
             const scaleX = (diagramWidth - 40) / effectiveWallWidth;
             const scale = Math.min(scaleX, scaleY);
 
-            // Starting X position to center all pieces
             let currentX = (diagramWidth - (totalWidth * scale)) / 2;
+
+            // Track label positions to avoid overlap
+            let usedLabelPositions = [];
 
             pieces.forEach((piece, i) => {
                 const picWidth = piece.width * scale;
                 const picHeight = piece.height * scale;
                 const picBottom = (piece.centerHeight - piece.height / 2) * scale;
 
-                // Create 8-bit frame
                 const frame = document.createElement('div');
                 frame.className = 'frame-8bit';
                 frame.style.width = picWidth + 'px';
@@ -778,62 +723,69 @@
                 frame.style.bottom = picBottom + 'px';
                 diagram.appendChild(frame);
 
-                // Create nails
                 const nailY = diagramHeight - (piece.nailHeight * scale);
                 const centerX = currentX + picWidth / 2;
                 const nailOffset = (piece.span / 2) * scale;
 
-                // Left nail
                 const nail1 = document.createElement('div');
                 nail1.className = 'nail';
                 nail1.style.left = (centerX - nailOffset) + 'px';
                 nail1.style.top = nailY + 'px';
                 diagram.appendChild(nail1);
 
-                // Right nail
                 const nail2 = document.createElement('div');
                 nail2.className = 'nail';
                 nail2.style.left = (centerX + nailOffset) + 'px';
                 nail2.style.top = nailY + 'px';
                 diagram.appendChild(nail2);
 
-                // Height measurement label
+                // Height label - position to the left, stagger if needed
                 const heightLabel = document.createElement('div');
                 heightLabel.className = 'diagram-label';
                 heightLabel.textContent = formatResult(piece.nailHeight);
-                heightLabel.style.left = (currentX - 5) + 'px';
-                heightLabel.style.top = nailY + 'px';
-                heightLabel.style.transform = 'translateX(-100%)';
+
+                let labelLeft = 5;
+                let labelTop = nailY - 8;
+
+                // Check for overlap with existing labels
+                for (let pos of usedLabelPositions) {
+                    if (Math.abs(pos.top - labelTop) < 20 && Math.abs(pos.left - labelLeft) < 60) {
+                        labelTop = pos.top + 18;
+                    }
+                }
+                usedLabelPositions.push({left: labelLeft, top: labelTop});
+
+                heightLabel.style.left = labelLeft + 'px';
+                heightLabel.style.top = labelTop + 'px';
                 diagram.appendChild(heightLabel);
 
-                // Span measurement label
+                // Span label - position above the frame
                 const spanLabel = document.createElement('div');
                 spanLabel.className = 'diagram-label';
                 spanLabel.textContent = formatResult(piece.span);
                 spanLabel.style.left = centerX + 'px';
-                spanLabel.style.top = (nailY - 20) + 'px';
+                spanLabel.style.bottom = (picBottom + picHeight + 15) + 'px';
                 spanLabel.style.transform = 'translateX(-50%)';
                 diagram.appendChild(spanLabel);
 
                 // Span line
                 const spanLine = document.createElement('div');
                 spanLine.className = 'diagram-measurement';
-                spanLine.style.height = '2px';
+                spanLine.style.height = '1px';
                 spanLine.style.width = (nailOffset * 2) + 'px';
                 spanLine.style.left = (centerX - nailOffset) + 'px';
-                spanLine.style.top = (nailY - 8) + 'px';
+                spanLine.style.bottom = (picBottom + picHeight + 10) + 'px';
                 diagram.appendChild(spanLine);
 
                 // Height line
                 const heightLine = document.createElement('div');
                 heightLine.className = 'diagram-measurement';
-                heightLine.style.width = '2px';
-                heightLine.style.height = (diagramHeight - nailY) + 'px';
-                heightLine.style.left = (currentX - 15) + 'px';
-                heightLine.style.bottom = '4px';
+                heightLine.style.width = '1px';
+                heightLine.style.height = (diagramHeight - nailY - 2) + 'px';
+                heightLine.style.left = (currentX - 10) + 'px';
+                heightLine.style.bottom = '2px';
                 diagram.appendChild(heightLine);
 
-                // Store right edge for spacing calculation
                 piece.rightEdgeX = currentX + picWidth;
                 piece.leftEdgeX = currentX;
                 piece.picBottom = picBottom;
@@ -848,16 +800,14 @@
                     const leftPiece = pieces[i];
                     const rightPiece = pieces[i + 1];
 
-                    const gapStart = leftPiece.rightEdgeX + 8; // Account for frame border
-                    const gapEnd = rightPiece.leftEdgeX - 8;
+                    const gapStart = leftPiece.rightEdgeX + 3;
+                    const gapEnd = rightPiece.leftEdgeX - 3;
                     const gapWidth = gapEnd - gapStart;
 
-                    // Calculate vertical position (middle of the gap area)
                     const avgBottom = (leftPiece.picBottom + rightPiece.picBottom) / 2;
                     const avgHeight = (leftPiece.picHeight + rightPiece.picHeight) / 2;
                     const lineY = diagramHeight - avgBottom - avgHeight / 2;
 
-                    // Spacing line
                     const spacingLine = document.createElement('div');
                     spacingLine.className = 'spacing-line';
                     spacingLine.style.width = gapWidth + 'px';
@@ -865,12 +815,11 @@
                     spacingLine.style.top = lineY + 'px';
                     diagram.appendChild(spacingLine);
 
-                    // Spacing label
                     const spacingLabel = document.createElement('div');
                     spacingLabel.className = 'spacing-label';
                     spacingLabel.textContent = formatResult(spacing);
                     spacingLabel.style.left = (gapStart + gapWidth / 2) + 'px';
-                    spacingLabel.style.top = (lineY - 22) + 'px';
+                    spacingLabel.style.top = (lineY - 18) + 'px';
                     diagram.appendChild(spacingLabel);
                 }
             }
@@ -881,11 +830,10 @@
             pieceIdCounter = 0;
             document.getElementById('results').classList.add('hidden');
             document.getElementById('piecesContainer').innerHTML = '';
-            addPiece(); // Start with one piece
+            addPiece();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Initialize with one piece on page load
         document.addEventListener('DOMContentLoaded', function() {
             addPiece();
         });
