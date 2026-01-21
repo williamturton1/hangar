@@ -335,177 +335,77 @@
             margin-top: 4px;
         }
 
-        .wall-diagram {
+        .diagram-section {
+            display: flex;
+            align-items: flex-end;
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .human-scale {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .human-figure {
+            position: relative;
+            width: 40px;
+        }
+
+        .human-figure svg {
+            width: 100%;
+            height: auto;
+        }
+
+        .eye-level-marker {
+            position: absolute;
+            right: -50px;
+            font-size: 0.6rem;
+            color: #666;
+            white-space: nowrap;
+            background: #111;
+            padding: 1px 4px;
+        }
+
+        .human-label {
+            font-size: 0.6rem;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .canvas-container {
+            flex: 1;
             position: relative;
             background: #fff;
             border: 1px solid #333;
-            margin: 20px auto;
+        }
+
+        #diagramCanvas {
+            display: block;
             width: 100%;
-            max-width: 600px;
-            height: 450px;
-            overflow: hidden;
+            height: auto;
         }
 
-        .floor-line {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: #000;
-        }
-
-        .frame-8bit {
-            position: absolute;
-            image-rendering: pixelated;
-            background: #fff;
-            border: 3px solid #000;
-        }
-
-        .nail {
-            position: absolute;
-            width: 24px;
-            height: 24px;
-            transform: translate(-50%, -50%);
-            z-index: 20;
-            font-size: 20px;
-            font-weight: bold;
-            color: #000;
+        .diagram-actions {
             display: flex;
-            align-items: center;
-            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
         }
 
-        .nail::before {
-            content: 'X';
-        }
-
-        .frame-number {
-            position: absolute;
-            color: #000;
-            font-size: 1.2rem;
-            font-weight: 700;
-            z-index: 10;
-        }
-
-        .leader-line {
-            position: absolute;
-            border-top: 1px solid #000;
-            z-index: 25;
-        }
-
-        .center-height-line {
-            position: absolute;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: repeating-linear-gradient(
-                to right,
-                #999 0px,
-                #999 3px,
-                transparent 3px,
-                transparent 8px
-            );
-            z-index: 2;
-        }
-
-        .center-height-label {
-            position: absolute;
-            right: 6px;
-            background: #fff;
-            color: #666;
-            padding: 1px 4px;
-            font-size: 0.6rem;
-            z-index: 3;
-        }
-
-        .hardware-height-line {
-            position: absolute;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: repeating-linear-gradient(
-                to right,
-                #666 0px,
-                #666 6px,
-                transparent 6px,
-                transparent 12px
-            );
-            z-index: 2;
-        }
-
-        .spacing-line {
-            position: absolute;
-            height: 1px;
-            background: #000;
-        }
-
-        .spacing-label {
-            position: absolute;
-            background: #000;
-            color: #0f0;
-            padding: 2px 4px;
-            font-size: 0.65rem;
-            font-weight: 600;
-            white-space: nowrap;
-            transform: translateX(-50%);
-        }
-
-        .diagram-label {
-            position: absolute;
-            background: #000;
-            color: #0f0;
-            padding: 2px 4px;
-            font-size: 0.65rem;
-            font-weight: 700;
-            white-space: nowrap;
-            z-index: 30;
-        }
-
-        .diagram-measurement {
-            position: absolute;
-            background: #000;
-            z-index: 15;
-        }
-
-        .floor-label {
-            position: absolute;
-            bottom: 6px;
-            right: 6px;
-            background: #000;
+        .btn-save {
+            background: #333;
             color: #fff;
-            padding: 2px 6px;
-            font-size: 0.7rem;
+            border: none;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-family: inherit;
         }
 
-        .center-line {
-            position: absolute;
-            top: 30px;
-            bottom: 4px;
-            width: 1px;
-            background: repeating-linear-gradient(
-                to bottom,
-                #000 0px,
-                #000 4px,
-                transparent 4px,
-                transparent 8px
-            );
-            z-index: 5;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .center-label {
-            position: absolute;
-            top: 6px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #000;
-            color: #fff;
-            padding: 2px 6px;
-            font-size: 0.65rem;
-            white-space: nowrap;
-            z-index: 25;
+        .btn-save:hover {
+            background: #444;
         }
 
         .settings-row {
@@ -625,9 +525,34 @@
 
             <div class="card">
                 <h2>Wall Diagram</h2>
-                <div class="wall-diagram" id="wallDiagram">
-                    <div class="floor-line"></div>
-                    <div class="floor-label">Floor</div>
+                <div class="diagram-section">
+                    <div class="human-scale" id="humanScale">
+                        <div class="human-figure" id="humanFigure">
+                            <svg viewBox="0 0 40 170" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Head -->
+                                <circle cx="20" cy="12" r="10" stroke="#666" stroke-width="2" fill="none"/>
+                                <!-- Body -->
+                                <line x1="20" y1="22" x2="20" y2="80" stroke="#666" stroke-width="2"/>
+                                <!-- Arms -->
+                                <line x1="20" y1="35" x2="5" y2="60" stroke="#666" stroke-width="2"/>
+                                <line x1="20" y1="35" x2="35" y2="60" stroke="#666" stroke-width="2"/>
+                                <!-- Legs -->
+                                <line x1="20" y1="80" x2="8" y2="130" stroke="#666" stroke-width="2"/>
+                                <line x1="20" y1="80" x2="32" y2="130" stroke="#666" stroke-width="2"/>
+                                <!-- Eye level indicator -->
+                                <line x1="0" y1="12" x2="40" y2="12" stroke="#0f0" stroke-width="1" stroke-dasharray="3,3"/>
+                            </svg>
+                            <div class="eye-level-marker" id="eyeLevelMarker">60" eye level</div>
+                        </div>
+                        <div class="human-label">5' tall reference</div>
+                    </div>
+                    <div class="canvas-container">
+                        <canvas id="diagramCanvas"></canvas>
+                    </div>
+                </div>
+                <div class="diagram-actions">
+                    <button class="btn-save" onclick="saveDiagram()">Save Diagram</button>
+                    <button class="btn-save" onclick="copyDiagram()">Copy to Clipboard</button>
                 </div>
             </div>
 
@@ -885,19 +810,11 @@
         }
 
         function drawDiagram(wallWidthIn, wallHeightIn) {
-            const diagram = document.getElementById('wallDiagram');
+            const canvas = document.getElementById('diagramCanvas');
+            const ctx = canvas.getContext('2d');
 
-            diagram.innerHTML = '<div class="floor-line"></div><div class="floor-label">Floor</div><div class="center-line"></div><div class="center-label">Center</div>';
-
-            // Get center height for reference lines
             const centerHeight = pieces.length > 0 ? pieces[0].centerHeight : 60;
-
             const totalPiecesWidth = pieces.reduce((sum, p) => sum + p.width, 0);
-
-            const diagramWidth = diagram.offsetWidth || 600;
-            const diagramHeight = 450;
-
-            const effectiveWallHeight = wallHeightIn || 96;
 
             // Calculate spacing based on mode
             let spacing = 0;
@@ -905,14 +822,11 @@
 
             if (pieces.length > 1) {
                 if (spacingMode === 'custom') {
-                    // Custom spacing mode
                     const customSpacingValue = parseMixedNumber(document.getElementById('customSpacing').value);
                     spacing = isNaN(customSpacingValue) ? 12 : toInches(customSpacingValue);
                     effectiveWallWidth = wallWidthIn || Math.max(totalPiecesWidth + spacing * (pieces.length - 1) + 40, 80);
                 } else {
-                    // Even spacing mode - distribute pieces evenly across wall
                     effectiveWallWidth = wallWidthIn || Math.max(totalPiecesWidth + 60, 120);
-                    // Calculate spacing to evenly distribute: wall width minus all pieces, divided by (number of gaps + 2 edges)
                     const availableSpace = effectiveWallWidth - totalPiecesWidth;
                     spacing = availableSpace / (pieces.length + 1);
                 }
@@ -920,144 +834,216 @@
                 effectiveWallWidth = wallWidthIn || Math.max(totalPiecesWidth + 40, 80);
             }
 
-            const totalWidth = totalPiecesWidth + spacing * (pieces.length - 1);
+            // Find highest piece top
+            let highestTop = 0;
+            pieces.forEach(p => {
+                const pieceTop = p.centerHeight + p.height / 2;
+                if (pieceTop > highestTop) highestTop = pieceTop;
+            });
 
-            const scaleY = (diagramHeight - 20) / effectiveWallHeight;
-            const scaleX = (diagramWidth - 40) / effectiveWallWidth;
-            const scale = Math.min(scaleX, scaleY);
+            // Diagram height is just above highest piece (add 15% padding)
+            const effectiveWallHeight = highestTop * 1.15;
 
-            // Calculate starting X position based on spacing mode
+            // Set canvas size based on wall proportions
+            const containerWidth = canvas.parentElement.offsetWidth || 600;
+            const aspectRatio = effectiveWallHeight / effectiveWallWidth;
+            const canvasWidth = containerWidth;
+            const canvasHeight = Math.min(canvasWidth * aspectRatio, 500);
+
+            // Set actual canvas resolution (2x for retina)
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = canvasWidth * dpr;
+            canvas.height = canvasHeight * dpr;
+            canvas.style.width = canvasWidth + 'px';
+            canvas.style.height = canvasHeight + 'px';
+            ctx.scale(dpr, dpr);
+
+            // Scale human figure to match
+            const humanFigure = document.getElementById('humanFigure');
+            const humanHeightInches = 66; // 5'6" average
+            const scale = canvasHeight / effectiveWallHeight;
+            const humanPixelHeight = humanHeightInches * scale;
+            humanFigure.style.height = humanPixelHeight + 'px';
+
+            // Position eye level marker (60" from floor)
+            const eyeLevelMarker = document.getElementById('eyeLevelMarker');
+            const eyeLevelFromTop = (humanHeightInches - 60) * scale;
+            eyeLevelMarker.style.top = eyeLevelFromTop + 'px';
+            eyeLevelMarker.textContent = formatResult(centerHeight) + ' eye level';
+
+            // Clear canvas
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+            const padding = 50;
+            const drawWidth = canvasWidth - padding * 2;
+            const drawHeight = canvasHeight - padding;
+            const scaleX = drawWidth / effectiveWallWidth;
+            const scaleY = drawHeight / effectiveWallHeight;
+            const drawScale = Math.min(scaleX, scaleY);
+
+            // Floor line (thick, at bottom)
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, canvasHeight - 2);
+            ctx.lineTo(canvasWidth, canvasHeight - 2);
+            ctx.stroke();
+
+            // Floor label
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 12px monospace';
+            ctx.textAlign = 'right';
+            ctx.fillText('FLOOR', canvasWidth - 10, canvasHeight - 8);
+
+            // Ceiling line (at top of diagram area)
+            ctx.strokeStyle = '#999';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(0, 10);
+            ctx.lineTo(canvasWidth, 10);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Ceiling label
+            ctx.fillStyle = '#999';
+            ctx.font = '10px monospace';
+            ctx.textAlign = 'right';
+            ctx.fillText('CEILING', canvasWidth - 10, 22);
+
+            // Calculate starting X position
             let currentX;
             if (pieces.length > 1 && spacingMode === 'even') {
-                // For even spacing, start after the first edge gap
-                currentX = (diagramWidth - (effectiveWallWidth * scale)) / 2 + (spacing * scale);
+                currentX = padding + (spacing * drawScale);
             } else {
-                currentX = (diagramWidth - (totalWidth * scale)) / 2;
+                const totalWidth = totalPiecesWidth + spacing * (pieces.length - 1);
+                currentX = (canvasWidth - totalWidth * drawScale) / 2;
             }
 
-            // Add center height reference line (dotted)
-            const centerHeightY = diagramHeight - (centerHeight * scale);
-            const centerHeightLine = document.createElement('div');
-            centerHeightLine.className = 'center-height-line';
-            centerHeightLine.style.top = centerHeightY + 'px';
-            diagram.appendChild(centerHeightLine);
+            // Draw center height reference line (dotted)
+            const centerHeightY = canvasHeight - (centerHeight * drawScale);
+            ctx.strokeStyle = '#999';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([3, 5]);
+            ctx.beginPath();
+            ctx.moveTo(0, centerHeightY);
+            ctx.lineTo(canvasWidth, centerHeightY);
+            ctx.stroke();
+            ctx.setLineDash([]);
 
-            const centerHeightLabel = document.createElement('div');
-            centerHeightLabel.className = 'center-height-label';
-            centerHeightLabel.textContent = formatResult(centerHeight) + ' center';
-            centerHeightLabel.style.top = (centerHeightY - 8) + 'px';
-            diagram.appendChild(centerHeightLabel);
+            // Center height label
+            ctx.fillStyle = '#666';
+            ctx.font = '10px monospace';
+            ctx.textAlign = 'right';
+            ctx.fillText(formatResult(centerHeight) + ' center', canvasWidth - 10, centerHeightY - 5);
 
-            // Track label positions to avoid overlap
-            let usedLabelPositions = [];
-
+            // Draw pieces
             pieces.forEach((piece, i) => {
-                const picWidth = piece.width * scale;
-                const picHeight = piece.height * scale;
-                const picBottom = (piece.centerHeight - piece.height / 2) * scale;
+                const picWidth = piece.width * drawScale;
+                const picHeight = piece.height * drawScale;
+                const picBottom = canvasHeight - ((piece.centerHeight - piece.height / 2) * drawScale);
+                const picTop = picBottom - picHeight;
+                const picCenterX = currentX + picWidth / 2;
 
-                // Add hardware height reference line (dashed) for each piece
-                const hardwareHeightLine = document.createElement('div');
-                hardwareHeightLine.className = 'hardware-height-line';
-                hardwareHeightLine.style.top = (diagramHeight - piece.nailHeight * scale) + 'px';
-                diagram.appendChild(hardwareHeightLine);
+                // Frame
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(currentX, picTop, picWidth, picHeight);
 
-                const frame = document.createElement('div');
-                frame.className = 'frame-8bit';
-                frame.style.width = picWidth + 'px';
-                frame.style.height = picHeight + 'px';
-                frame.style.left = currentX + 'px';
-                frame.style.bottom = picBottom + 'px';
-                diagram.appendChild(frame);
+                // Dotted center line on each piece
+                ctx.strokeStyle = '#666';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath();
+                ctx.moveTo(picCenterX, picTop);
+                ctx.lineTo(picCenterX, picBottom);
+                ctx.stroke();
+                ctx.setLineDash([]);
 
-                // Add frame number
-                const frameNumber = document.createElement('div');
-                frameNumber.className = 'frame-number';
-                frameNumber.textContent = piece.index;
-                frameNumber.style.left = (currentX + picWidth / 2) + 'px';
-                frameNumber.style.bottom = (picBottom + picHeight / 2) + 'px';
-                frameNumber.style.transform = 'translate(-50%, 50%)';
-                diagram.appendChild(frameNumber);
+                // Piece number
+                ctx.fillStyle = '#000';
+                ctx.font = 'bold 16px monospace';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(piece.index.toString(), picCenterX, picTop + picHeight / 2);
 
-                const nailY = diagramHeight - (piece.nailHeight * scale);
-                const centerX = currentX + picWidth / 2;
-                const nailOffset = (piece.span / 2) * scale;
+                // Nail positions
+                const nailY = canvasHeight - (piece.nailHeight * drawScale);
+                const nailOffset = (piece.span / 2) * drawScale;
+                const nail1X = picCenterX - nailOffset;
+                const nail2X = picCenterX + nailOffset;
 
-                const nail1 = document.createElement('div');
-                nail1.className = 'nail';
-                nail1.style.left = (centerX - nailOffset) + 'px';
-                nail1.style.top = nailY + 'px';
-                diagram.appendChild(nail1);
+                // Draw red X markers for nails
+                ctx.strokeStyle = '#f00';
+                ctx.lineWidth = 3;
+                const xSize = 8;
 
-                const nail2 = document.createElement('div');
-                nail2.className = 'nail';
-                nail2.style.left = (centerX + nailOffset) + 'px';
-                nail2.style.top = nailY + 'px';
-                diagram.appendChild(nail2);
+                // Left nail X
+                ctx.beginPath();
+                ctx.moveTo(nail1X - xSize, nailY - xSize);
+                ctx.lineTo(nail1X + xSize, nailY + xSize);
+                ctx.moveTo(nail1X + xSize, nailY - xSize);
+                ctx.lineTo(nail1X - xSize, nailY + xSize);
+                ctx.stroke();
 
-                // Height label - position to the left, stagger if needed
-                const heightLabel = document.createElement('div');
-                heightLabel.className = 'diagram-label';
-                heightLabel.textContent = formatResult(piece.nailHeight);
+                // Right nail X
+                ctx.beginPath();
+                ctx.moveTo(nail2X - xSize, nailY - xSize);
+                ctx.lineTo(nail2X + xSize, nailY + xSize);
+                ctx.moveTo(nail2X + xSize, nailY - xSize);
+                ctx.lineTo(nail2X - xSize, nailY + xSize);
+                ctx.stroke();
 
-                let labelLeft = 5;
-                let labelTop = nailY - 8;
+                // Nail height label
+                ctx.fillStyle = '#000';
+                ctx.fillRect(5, nailY - 8, 55, 16);
+                ctx.fillStyle = '#0f0';
+                ctx.font = 'bold 11px monospace';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(formatResult(piece.nailHeight), 8, nailY);
 
-                // Check for overlap with existing labels
-                for (let pos of usedLabelPositions) {
-                    if (Math.abs(pos.top - labelTop) < 20 && Math.abs(pos.left - labelLeft) < 60) {
-                        labelTop = pos.top + 18;
-                    }
-                }
-                usedLabelPositions.push({left: labelLeft, top: labelTop});
+                // Leader line to nail
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(60, nailY);
+                ctx.lineTo(nail1X - xSize - 5, nailY);
+                ctx.stroke();
 
-                heightLabel.style.left = labelLeft + 'px';
-                heightLabel.style.top = labelTop + 'px';
-                diagram.appendChild(heightLabel);
+                // Height measurement line (vertical from floor to nail)
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(currentX - 15, canvasHeight - 2);
+                ctx.lineTo(currentX - 15, nailY);
+                ctx.stroke();
 
-                // Leader line from height label to nail
-                const leaderLine = document.createElement('div');
-                leaderLine.className = 'leader-line';
-                const leaderStartX = 50;
-                const leaderEndX = centerX - nailOffset - 12;
-                leaderLine.style.left = leaderStartX + 'px';
-                leaderLine.style.top = nailY + 'px';
-                leaderLine.style.width = (leaderEndX - leaderStartX) + 'px';
-                diagram.appendChild(leaderLine);
-
-                // Span label - position above the frame
-                const spanLabel = document.createElement('div');
-                spanLabel.className = 'diagram-label';
-                spanLabel.textContent = formatResult(piece.span);
-                spanLabel.style.left = centerX + 'px';
-                spanLabel.style.bottom = (picBottom + picHeight + 15) + 'px';
-                spanLabel.style.transform = 'translateX(-50%)';
-                diagram.appendChild(spanLabel);
+                // Span measurement above frame
+                ctx.fillStyle = '#000';
+                ctx.fillRect(picCenterX - 30, picTop - 25, 60, 16);
+                ctx.fillStyle = '#0f0';
+                ctx.font = 'bold 11px monospace';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(formatResult(piece.span), picCenterX, picTop - 17);
 
                 // Span line
-                const spanLine = document.createElement('div');
-                spanLine.className = 'diagram-measurement';
-                spanLine.style.height = '1px';
-                spanLine.style.width = (nailOffset * 2) + 'px';
-                spanLine.style.left = (centerX - nailOffset) + 'px';
-                spanLine.style.bottom = (picBottom + picHeight + 10) + 'px';
-                diagram.appendChild(spanLine);
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(nail1X, picTop - 10);
+                ctx.lineTo(nail2X, picTop - 10);
+                ctx.stroke();
 
-                // Height line
-                const heightLine = document.createElement('div');
-                heightLine.className = 'diagram-measurement';
-                heightLine.style.width = '1px';
-                heightLine.style.height = (diagramHeight - nailY - 2) + 'px';
-                heightLine.style.left = (currentX - 10) + 'px';
-                heightLine.style.bottom = '2px';
-                diagram.appendChild(heightLine);
-
+                // Store positions for spacing indicators
                 piece.rightEdgeX = currentX + picWidth;
                 piece.leftEdgeX = currentX;
+                piece.picTop = picTop;
                 piece.picBottom = picBottom;
-                piece.picHeight = picHeight;
 
-                currentX += picWidth + spacing * scale;
+                currentX += picWidth + spacing * drawScale;
             });
 
             // Draw spacing indicators between paintings
@@ -1069,25 +1055,70 @@
                     const gapStart = leftPiece.rightEdgeX + 3;
                     const gapEnd = rightPiece.leftEdgeX - 3;
                     const gapWidth = gapEnd - gapStart;
+                    const gapCenterX = gapStart + gapWidth / 2;
 
+                    const avgTop = (leftPiece.picTop + rightPiece.picTop) / 2;
                     const avgBottom = (leftPiece.picBottom + rightPiece.picBottom) / 2;
-                    const avgHeight = (leftPiece.picHeight + rightPiece.picHeight) / 2;
-                    const lineY = diagramHeight - avgBottom - avgHeight / 2;
+                    const lineY = avgTop + (avgBottom - avgTop) / 2;
 
-                    const spacingLine = document.createElement('div');
-                    spacingLine.className = 'spacing-line';
-                    spacingLine.style.width = gapWidth + 'px';
-                    spacingLine.style.left = gapStart + 'px';
-                    spacingLine.style.top = lineY + 'px';
-                    diagram.appendChild(spacingLine);
+                    // Spacing line
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(gapStart, lineY);
+                    ctx.lineTo(gapEnd, lineY);
+                    ctx.stroke();
 
-                    const spacingLabel = document.createElement('div');
-                    spacingLabel.className = 'spacing-label';
-                    spacingLabel.textContent = formatResult(spacing);
-                    spacingLabel.style.left = (gapStart + gapWidth / 2) + 'px';
-                    spacingLabel.style.top = (lineY - 18) + 'px';
-                    diagram.appendChild(spacingLabel);
+                    // Spacing label
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(gapCenterX - 25, lineY - 22, 50, 16);
+                    ctx.fillStyle = '#0f0';
+                    ctx.font = 'bold 10px monospace';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(formatResult(spacing), gapCenterX, lineY - 14);
                 }
+            }
+
+            // Wall center line (dotted vertical)
+            const wallCenterX = canvasWidth / 2;
+            ctx.strokeStyle = '#999';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(wallCenterX, 30);
+            ctx.lineTo(wallCenterX, canvasHeight - 10);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Wall center label
+            ctx.fillStyle = '#000';
+            ctx.fillRect(wallCenterX - 25, 12, 50, 14);
+            ctx.fillStyle = '#fff';
+            ctx.font = '10px monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('CENTER', wallCenterX, 19);
+        }
+
+        function saveDiagram() {
+            const canvas = document.getElementById('diagramCanvas');
+            const link = document.createElement('a');
+            link.download = 'hangar-diagram.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        async function copyDiagram() {
+            const canvas = document.getElementById('diagramCanvas');
+            try {
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                await navigator.clipboard.write([
+                    new ClipboardItem({ 'image/png': blob })
+                ]);
+                alert('Diagram copied to clipboard!');
+            } catch (err) {
+                alert('Could not copy to clipboard. Try using Save instead.');
             }
         }
 
