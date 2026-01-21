@@ -781,19 +781,30 @@
                 <button id="unitCm" onclick="setUnit('cm')">Centimeters</button>
             </div>
 
-            <label>Hardware Type</label>
+            <label>Hanging Method</label>
             <div class="unit-toggle" style="margin-bottom: 16px;">
                 <button class="active" id="hwNails" onclick="setHardwareType('nails')">Hooks/Screws</button>
                 <button id="hwWire" onclick="setHardwareType('wire')">Wire</button>
                 <button id="hwCleat" onclick="setHardwareType('cleat')">Cleat</button>
+                <button id="hwFrame" onclick="setHardwareType('frame')">On Frame/Stretcher</button>
             </div>
 
             <div class="settings-row">
                 <div class="input-field">
                     <label>Center Height from Floor</label>
-                    <input type="text" id="centerHeight" value="60" placeholder="60">
+                    <input type="text" id="centerHeight" value="60" placeholder="60" oninput="onCenterHeightChange()">
                     <p class="help-text">Standard gallery height is 60"</p>
                 </div>
+                <div class="input-field" style="flex: 0 0 auto; display: flex; align-items: center; padding-top: 18px;">
+                    <span style="color: #666; font-size: 0.85rem;">or</span>
+                </div>
+                <div class="input-field">
+                    <label>Bottom of Piece from Floor</label>
+                    <input type="text" id="bottomHeight" placeholder="e.g., 42" oninput="onBottomHeightChange()">
+                    <p class="help-text">Auto-fills center based on piece height</p>
+                </div>
+            </div>
+            <div class="settings-row">
                 <div class="input-field">
                     <label>Wall Length <span class="optional-tag">(optional)</span></label>
                     <input type="text" id="wallWidth" placeholder="e.g., 120 or 10 ft">
@@ -815,6 +826,14 @@
                         <label>Space Between Pieces</label>
                         <input type="text" id="customSpacing" placeholder="e.g., 6 or 6 1/2">
                     </div>
+                </div>
+            </div>
+
+            <div class="spacing-options">
+                <label>Install Direction <span class="optional-tag" style="cursor: help;" title="Best when all pieces use same center height from floor">(for quick install)</span></label>
+                <div class="spacing-toggle">
+                    <button class="active" id="installLTR" onclick="setInstallDirection('ltr')">Left to Right</button>
+                    <button id="installRTL" onclick="setInstallDirection('rtl')">Right to Left</button>
                 </div>
             </div>
         </div>
@@ -844,7 +863,7 @@
                     <button class="btn-save" onclick="copyDiagram()">Copy to Clipboard</button>
                     <div class="view-toggle">
                         <button class="active" id="viewFull" onclick="setViewMode('full')">Full</button>
-                        <button id="viewNails" onclick="setViewMode('nails')">Nails Only</button>
+                        <button id="viewNails" onclick="setViewMode('nails')">Hardware Only</button>
                     </div>
                 </div>
             </div>
@@ -876,10 +895,50 @@
         let pieces = [];
         let spacingMode = 'even'; // 'even' or 'custom'
         let viewMode = 'full'; // 'full' or 'nails'
-        let hardwareType = 'nails'; // 'nails', 'wire', or 'cleat'
+        let hardwareType = 'nails'; // 'nails', 'wire', 'cleat', or 'frame'
+        let installDirection = 'ltr'; // 'ltr' (left to right) or 'rtl' (right to left)
         let verificationErrors = 0;
+        let heightInputSource = 'center'; // 'center' or 'bottom' - tracks which input was last edited
         const MAX_VERIFICATION_ERRORS = 3;
         const CM_PER_INCH = 2.54;
+
+        function setInstallDirection(dir) {
+            installDirection = dir;
+            document.getElementById('installLTR').classList.toggle('active', dir === 'ltr');
+            document.getElementById('installRTL').classList.toggle('active', dir === 'rtl');
+            // Redraw if results are visible
+            if (!document.getElementById('results').classList.contains('hidden')) {
+                renderResults();
+                const wallWidth = parseMixedNumber(document.getElementById('wallWidth').value);
+                const wallHeight = parseMixedNumber(document.getElementById('wallHeight').value);
+                drawDiagram(wallWidth ? toInches(wallWidth) : null, wallHeight ? toInches(wallHeight) : null);
+            }
+        }
+
+        function onCenterHeightChange() {
+            heightInputSource = 'center';
+            // Clear bottom height when center is manually edited
+            document.getElementById('bottomHeight').value = '';
+        }
+
+        function onBottomHeightChange() {
+            heightInputSource = 'bottom';
+            // Clear center height when bottom is manually edited
+            document.getElementById('centerHeight').value = '';
+        }
+
+        function getEffectiveCenterHeight(pieceHeightIn) {
+            const centerVal = parseMixedNumber(document.getElementById('centerHeight').value);
+            const bottomVal = parseMixedNumber(document.getElementById('bottomHeight').value);
+
+            if (!isNaN(centerVal) && centerVal > 0) {
+                return toInches(centerVal);
+            } else if (!isNaN(bottomVal) && bottomVal > 0 && pieceHeightIn > 0) {
+                // Calculate center from bottom: center = bottom + (height / 2)
+                return toInches(bottomVal) + (pieceHeightIn / 2);
+            }
+            return 60; // Default to 60" if nothing is set
+        }
 
         function setSpacingMode(mode) {
             spacingMode = mode;
@@ -893,6 +952,7 @@
             document.getElementById('hwNails').classList.toggle('active', type === 'nails');
             document.getElementById('hwWire').classList.toggle('active', type === 'wire');
             document.getElementById('hwCleat').classList.toggle('active', type === 'cleat');
+            document.getElementById('hwFrame').classList.toggle('active', type === 'frame');
             // Rebuild all piece cards with new hardware inputs
             rebuildPieceCards();
         }
@@ -1074,6 +1134,16 @@
                         </div>
                     </div>
                 `;
+            } else if (hardwareType === 'frame') {
+                return `
+                    <div class="input-row" style="margin-top: 12px;">
+                        <div class="input-field">
+                            <label>Frame/Stretcher Width</label>
+                            <input type="text" class="dimension-input" data-piece="${pieceId}" data-field="frameWidth" placeholder="e.g., 1 1/2">
+                            <p class="help-text">Width of frame or stretcher bar</p>
+                        </div>
+                    </div>
+                `;
             }
         }
 
@@ -1081,6 +1151,20 @@
             const container = document.getElementById('piecesContainer');
             const pieceId = pieceIdCounter++;
             const pieceCount = container.children.length + 1;
+
+            // Show placement option only for pieces after the first
+            const placementHtml = pieceCount > 1 ? `
+                <div class="input-row" style="margin-bottom: 12px;">
+                    <div class="input-field">
+                        <label>Position Relative to Previous</label>
+                        <div class="spacing-toggle" style="margin-top: 4px;">
+                            <button class="active" data-piece="${pieceId}" data-placement="side" onclick="setPlacement(${pieceId}, 'side')">Side by Side</button>
+                            <button data-piece="${pieceId}" data-placement="above" onclick="setPlacement(${pieceId}, 'above')">Above</button>
+                            <button data-piece="${pieceId}" data-placement="below" onclick="setPlacement(${pieceId}, 'below')">Below</button>
+                        </div>
+                    </div>
+                </div>
+            ` : '';
 
             const pieceDiv = document.createElement('div');
             pieceDiv.className = 'piece-card';
@@ -1090,6 +1174,13 @@
                     <h3>Piece ${pieceCount}</h3>
                     <button class="btn-remove" onclick="removePiece(${pieceId})">Remove</button>
                 </div>
+                <div class="input-row" style="margin-bottom: 8px;">
+                    <div class="input-field">
+                        <label>Name <span class="optional-tag">(optional)</span></label>
+                        <input type="text" data-piece="${pieceId}" data-field="name" placeholder="e.g., Starry Night">
+                    </div>
+                </div>
+                ${placementHtml}
                 <div class="input-row">
                     <div class="input-field">
                         <label>Width</label>
@@ -1104,6 +1195,20 @@
             `;
             container.appendChild(pieceDiv);
             updatePieceNumbers();
+        }
+
+        function setPlacement(pieceId, placement) {
+            const card = document.getElementById(`piece-${pieceId}`);
+            if (!card) return;
+            const buttons = card.querySelectorAll('[data-placement]');
+            buttons.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.placement === placement);
+            });
+        }
+
+        function getPlacement(card) {
+            const activeBtn = card.querySelector('[data-placement].active');
+            return activeBtn ? activeBtn.dataset.placement : 'side';
         }
 
         function removePiece(pieceId) {
@@ -1135,7 +1240,6 @@
                 return;
             }
 
-            const centerHeight = toInches(parseMixedNumber(document.getElementById('centerHeight').value)) || 60;
             const wallWidth = parseMixedNumber(document.getElementById('wallWidth').value);
             const wallHeight = parseMixedNumber(document.getElementById('wallHeight').value);
 
@@ -1144,21 +1248,57 @@
             let hasError = false;
             pieceCards.forEach((card, i) => {
                 const pieceId = card.id.replace('piece-', '');
+                const nameField = card.querySelector(`[data-field="name"]`);
+                const pieceName = nameField ? nameField.value.trim() : '';
                 const width = parseMixedNumber(card.querySelector(`[data-field="width"]`).value);
                 const height = parseMixedNumber(card.querySelector(`[data-field="height"]`).value);
-                const fromTop = parseMixedNumber(card.querySelector(`[data-field="fromTop"]`).value);
+                const fromTopField = card.querySelector(`[data-field="fromTop"]`);
+                const fromTop = fromTopField ? parseMixedNumber(fromTopField.value) : 0;
 
-                if (isNaN(width) || isNaN(height) || isNaN(fromTop)) {
-                    alert(`Please fill in all fields for Piece ${i + 1}`);
+                if (isNaN(width) || isNaN(height)) {
+                    alert(`Please fill in width and height for Piece ${i + 1}`);
                     hasError = true;
                     return;
                 }
 
                 const widthIn = toInches(width);
                 const heightIn = toInches(height);
-                const fromTopIn = toInches(fromTop);
+                const fromTopIn = fromTopField ? toInches(fromTop) : 0;
 
-                let spanIn, nailHeight, wireSag = 0, cleatCount = 1, cleatPositions = [], cleatWidthIn = 12, cleatHeightIn = 3;
+                // Get placement option
+                const placement = i === 0 ? 'side' : getPlacement(card);
+
+                // Calculate center height based on placement
+                let centerHeight;
+                const defaultCenterHeight = getEffectiveCenterHeight(heightIn);
+
+                if (placement === 'side' || i === 0) {
+                    // Use default center height for side-by-side or first piece
+                    centerHeight = defaultCenterHeight;
+                } else {
+                    // For above/below, calculate relative to previous piece
+                    const prevPiece = pieces[pieces.length - 1];
+                    // Use custom spacing or default 6" for vertical gap
+                    const customSpacingValue = parseMixedNumber(document.getElementById('customSpacing').value);
+                    const verticalGap = !isNaN(customSpacingValue) ? toInches(customSpacingValue) : 6;
+
+                    if (placement === 'above') {
+                        // Center above: prev center + prev height/2 + gap + current height/2
+                        centerHeight = prevPiece.centerHeight + (prevPiece.height / 2) + verticalGap + (heightIn / 2);
+                    } else if (placement === 'below') {
+                        // Center below: prev center - prev height/2 - gap - current height/2
+                        centerHeight = prevPiece.centerHeight - (prevPiece.height / 2) - verticalGap - (heightIn / 2);
+                    }
+                }
+
+                // Validate fromTop is provided for hardware types that need it
+                if (hardwareType !== 'frame' && (isNaN(fromTop) || fromTop === 0)) {
+                    alert(`Please fill in hardware from top for Piece ${i + 1}`);
+                    hasError = true;
+                    return;
+                }
+
+                let spanIn, nailHeight, wireSag = 0, cleatCount = 1, cleatPositions = [], cleatWidthIn = 12, cleatHeightIn = 3, frameWidthIn = 0;
 
                 if (hardwareType === 'nails') {
                     const span = parseMixedNumber(card.querySelector(`[data-field="span"]`).value);
@@ -1198,7 +1338,15 @@
 
                     wireSag = Math.sqrt(halfWire * halfWire - halfSpan * halfSpan);
 
-                    // Calculate nail height accounting for wire sag
+                    // Validate: wire sag cannot exceed fromTop distance
+                    // If wireSag > fromTop, hardware would sit above the top of the piece
+                    if (wireSag > fromTopIn) {
+                        alert(`Error: Wire length is too long for Piece ${i + 1}. The wire sag (${formatResult(wireSag)}) exceeds the D-ring distance from top (${formatResult(fromTopIn)}), which would place the hardware above the piece. Use a shorter wire or move the D-rings lower.`);
+                        hasError = true;
+                        return;
+                    }
+
+                    // Calculate hardware height accounting for wire sag
                     // Top of picture = nailHeight - wireSag + fromTop
                     // Center = top - height/2 = nailHeight - wireSag + fromTop - height/2
                     // We want center = centerHeight
@@ -1239,10 +1387,39 @@
 
                     const pictureTop = centerHeight + (heightIn / 2);
                     nailHeight = pictureTop - fromTopIn;
+
+                } else if (hardwareType === 'frame') {
+                    // Frame/Stretcher mode: piece rests directly on screws
+                    const frameWidthVal = parseMixedNumber(card.querySelector(`[data-field="frameWidth"]`).value);
+                    if (isNaN(frameWidthVal)) {
+                        alert(`Please fill in frame/stretcher width for Piece ${i + 1}`);
+                        hasError = true;
+                        return;
+                    }
+                    frameWidthIn = toInches(frameWidthVal);
+
+                    // Use 60% of width for span (distance between screws)
+                    spanIn = Math.round(widthIn * 0.6);
+
+                    // Calculate hardware height:
+                    // The piece bottom rests on the screws at the inside of the frame
+                    // pieceBottom = centerHeight - (heightIn / 2)
+                    // Hardware (screw) height = pieceBottom + frameWidth
+                    const pieceBottom = centerHeight - (heightIn / 2);
+                    nailHeight = pieceBottom + frameWidthIn;
+                }
+
+                // Final validation: hardware location should never exceed piece top height
+                const pieceTopHeight = centerHeight + (heightIn / 2);
+                if (nailHeight > pieceTopHeight) {
+                    alert(`Error: Hardware location (${formatResult(nailHeight)}) would be above the top of Piece ${i + 1} (${formatResult(pieceTopHeight)} from floor). Please check your measurements.`);
+                    hasError = true;
+                    return;
                 }
 
                 pieces.push({
                     index: i + 1,
+                    name: pieceName,
                     width: widthIn,
                     height: heightIn,
                     span: spanIn,
@@ -1254,14 +1431,16 @@
                     cleatCount: cleatCount,
                     cleatPositions: cleatPositions,
                     cleatWidth: cleatWidthIn,
-                    cleatHeight: cleatHeightIn
+                    cleatHeight: cleatHeightIn,
+                    frameWidth: frameWidthIn,
+                    placement: placement
                 });
             });
 
             if (hasError) return;
 
             // Verify calculations
-            if (!verifyCalculations(centerHeight, pieceCards)) {
+            if (!verifyCalculations(pieceCards)) {
                 verificationErrors++;
                 console.warn(`Verification failed (${verificationErrors}/${MAX_VERIFICATION_ERRORS})`);
 
@@ -1281,7 +1460,7 @@
             document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
         }
 
-        function verifyCalculations(centerHeight, pieceCards) {
+        function verifyCalculations(pieceCards) {
             // Recalculate and verify each piece's math
             const tolerance = 0.001; // Allow tiny floating point differences
 
@@ -1292,6 +1471,7 @@
                 const widthIn = piece.width;
                 const heightIn = piece.height;
                 const fromTopIn = piece.fromTop;
+                const centerHeight = piece.centerHeight; // Use piece-specific center height
                 const pictureTop = centerHeight + (heightIn / 2);
 
                 let expectedNailHeight;
@@ -1309,6 +1489,10 @@
                         console.error(`Wire sag mismatch for piece ${i+1}: ${piece.wireSag} vs ${expectedWireSag}`);
                         return false;
                     }
+                } else if (piece.hardwareType === 'frame') {
+                    // Frame/stretcher - calculate from bottom + frame width
+                    const pieceBottom = centerHeight - (heightIn / 2);
+                    expectedNailHeight = pieceBottom + piece.frameWidth;
                 } else {
                     // Nails or cleat - simple calculation
                     expectedNailHeight = pictureTop - fromTopIn;
@@ -1330,32 +1514,35 @@
             // Update header based on hardware type
             const header = document.getElementById('resultsHeader');
             if (hardwareType === 'nails') {
-                header.textContent = 'Nail Placement Guide';
+                header.textContent = 'Hardware Placement Guide';
             } else if (hardwareType === 'wire') {
                 header.textContent = 'Wire Hanging Guide';
             } else if (hardwareType === 'cleat') {
                 header.textContent = 'Cleat Placement Guide';
+            } else if (hardwareType === 'frame') {
+                header.textContent = 'Frame/Stretcher Placement Guide';
             }
 
             pieces.forEach((piece, i) => {
                 let html = '';
+                const pieceTitle = piece.name ? `${piece.name} (Piece ${piece.index})` : `Piece ${piece.index}`;
 
                 if (piece.hardwareType === 'nails') {
                     html = `
                         <div class="piece-card">
-                            <h3>Piece ${piece.index}</h3>
+                            <h3>${pieceTitle}</h3>
                             <div class="result-item">
-                                <h3>Nail Height from Floor</h3>
+                                <h3>Hardware Height from Floor</h3>
                                 <div class="result-value">${formatResult(piece.nailHeight)}</div>
                                 <div class="note">Measure up from the floor</div>
                             </div>
                             <div class="input-row">
                                 <div class="result-item" style="flex:1">
-                                    <h3>Distance Between Nails</h3>
+                                    <h3>Distance Between Hardware</h3>
                                     <div class="result-value">${formatResult(piece.span)}</div>
                                 </div>
                                 <div class="result-item" style="flex:1">
-                                    <h3>Each Nail from Center</h3>
+                                    <h3>Each from Center</h3>
                                     <div class="result-value">${formatResult(piece.span / 2)}</div>
                                 </div>
                             </div>
@@ -1364,19 +1551,19 @@
                 } else if (piece.hardwareType === 'wire') {
                     html = `
                         <div class="piece-card">
-                            <h3>Piece ${piece.index}</h3>
+                            <h3>${pieceTitle}</h3>
                             <div class="result-item">
-                                <h3>Hook Height from Floor</h3>
+                                <h3>Hardware Height from Floor</h3>
                                 <div class="result-value">${formatResult(piece.nailHeight)}</div>
                                 <div class="note">Two hooks at this height (wire sag: ${formatResult(piece.wireSag)})</div>
                             </div>
                             <div class="input-row">
                                 <div class="result-item" style="flex:1">
-                                    <h3>Distance Between Hooks</h3>
+                                    <h3>Distance Between Hardware</h3>
                                     <div class="result-value">${formatResult(piece.span)}</div>
                                 </div>
                                 <div class="result-item" style="flex:1">
-                                    <h3>Each Hook from Center</h3>
+                                    <h3>Each from Center</h3>
                                     <div class="result-value">${formatResult(piece.span / 2)}</div>
                                 </div>
                             </div>
@@ -1393,9 +1580,9 @@
 
                     html = `
                         <div class="piece-card">
-                            <h3>Piece ${piece.index}</h3>
+                            <h3>${pieceTitle}</h3>
                             <div class="result-item">
-                                <h3>Cleat Height from Floor</h3>
+                                <h3>Hardware Height from Floor</h3>
                                 <div class="result-value">${formatResult(piece.nailHeight)}</div>
                                 <div class="note">Bottom edge of wall cleat (${formatResult(piece.cleatWidth)} x ${formatResult(piece.cleatHeight)})</div>
                             </div>
@@ -1412,10 +1599,166 @@
                             </div>
                         </div>
                     `;
+                } else if (piece.hardwareType === 'frame') {
+                    html = `
+                        <div class="piece-card">
+                            <h3>${pieceTitle}</h3>
+                            <div class="result-item">
+                                <h3>Hardware Height from Floor</h3>
+                                <div class="result-value">${formatResult(piece.nailHeight)}</div>
+                                <div class="note">Screws for piece to rest on (frame width: ${formatResult(piece.frameWidth)})</div>
+                            </div>
+                            <div class="input-row">
+                                <div class="result-item" style="flex:1">
+                                    <h3>Distance Between Hardware</h3>
+                                    <div class="result-value">${formatResult(piece.span)}</div>
+                                </div>
+                                <div class="result-item" style="flex:1">
+                                    <h3>Each from Center</h3>
+                                    <div class="result-value">${formatResult(piece.span / 2)}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
                 }
 
                 container.innerHTML += html;
             });
+
+            // Add Quick Install Guide section
+            if (pieces.length > 0) {
+                const wallWidth = parseMixedNumber(document.getElementById('wallWidth').value);
+                const wallWidthIn = wallWidth ? toInches(wallWidth) : null;
+
+                // Calculate columns (same logic as drawDiagram)
+                let qiColumns = [];
+                let qiColumnWidths = [];
+                pieces.forEach((p, i) => {
+                    if (i === 0 || p.placement === 'side') {
+                        qiColumns.push([i]);
+                        qiColumnWidths.push(p.width);
+                    } else {
+                        qiColumns[qiColumns.length - 1].push(i);
+                        qiColumnWidths[qiColumnWidths.length - 1] = Math.max(qiColumnWidths[qiColumnWidths.length - 1], p.width);
+                    }
+                });
+
+                const totalColumnsWidth = qiColumnWidths.reduce((sum, w) => sum + w, 0);
+                const numColumns = qiColumns.length;
+
+                let spacing = 0;
+                let edgeSpacing = 0;
+                let effectiveWallWidth;
+
+                if (numColumns > 1) {
+                    if (spacingMode === 'custom') {
+                        const customSpacingValue = parseMixedNumber(document.getElementById('customSpacing').value);
+                        spacing = isNaN(customSpacingValue) ? 12 : toInches(customSpacingValue);
+                        const totalContentWidth = totalColumnsWidth + spacing * (numColumns - 1);
+                        effectiveWallWidth = wallWidthIn || Math.max(totalContentWidth + 40, 80);
+                        edgeSpacing = (effectiveWallWidth - totalContentWidth) / 2;
+                    } else {
+                        effectiveWallWidth = wallWidthIn || Math.max(totalColumnsWidth + 60, 120);
+                        const availableSpace = effectiveWallWidth - totalColumnsWidth;
+                        spacing = availableSpace / (numColumns + 1);
+                        edgeSpacing = spacing;
+                    }
+                } else {
+                    effectiveWallWidth = wallWidthIn || Math.max(totalColumnsWidth + 40, 80);
+                    edgeSpacing = (effectiveWallWidth - totalColumnsWidth) / 2;
+                }
+
+                // Calculate column center positions
+                let columnCenters = [];
+                let colX = edgeSpacing;
+                for (let c = 0; c < numColumns; c++) {
+                    columnCenters.push(colX + qiColumnWidths[c] / 2);
+                    colX += qiColumnWidths[c] + spacing;
+                }
+
+                // Map each piece to its column center
+                let pieceCenters = [];
+                let pieceColumnIndex = [];
+                let currentCol = 0;
+                for (let i = 0; i < pieces.length; i++) {
+                    if (i > 0 && pieces[i].placement === 'side') {
+                        currentCol++;
+                    }
+                    pieceCenters.push(columnCenters[currentCol]);
+                    pieceColumnIndex.push(currentCol);
+                }
+
+                // Reverse order for RTL
+                let orderedPieces = [...pieces];
+                let orderedCenters = [...pieceCenters];
+                if (installDirection === 'rtl') {
+                    orderedPieces = orderedPieces.reverse();
+                    orderedCenters = orderedCenters.reverse();
+                }
+
+                // Build Quick Install HTML
+                let quickInstallHtml = `
+                    <div class="piece-card" style="margin-top: 16px; border-top: 2px solid #fff;">
+                        <h3 style="margin-bottom: 12px;">Quick Install Guide (${installDirection === 'ltr' ? 'Left → Right' : 'Right → Left'})</h3>
+                        <p class="help-text" style="margin-bottom: 12px;">Best when all pieces use same center height</p>
+                `;
+
+                orderedPieces.forEach((piece, i) => {
+                    const originalIndex = installDirection === 'rtl' ? pieces.length - 1 - i : i;
+                    const centerFromEdge = installDirection === 'rtl'
+                        ? effectiveWallWidth - pieceCenters[originalIndex]
+                        : pieceCenters[originalIndex];
+
+                    // Distance from previous center (or from wall corner for first piece)
+                    let distanceLabel, distanceValue;
+                    const isStacked = piece.placement === 'above' || piece.placement === 'below';
+
+                    if (i === 0) {
+                        distanceLabel = installDirection === 'rtl' ? 'From right wall to center' : 'From left wall to center';
+                        distanceValue = centerFromEdge;
+                    } else if (isStacked) {
+                        // For stacked pieces, show vertical position info
+                        distanceLabel = piece.placement === 'above' ? 'Above previous' : 'Below previous';
+                        distanceValue = 0; // Will show position info instead
+                    } else {
+                        const prevOriginalIndex = installDirection === 'rtl' ? pieces.length - i : i - 1;
+                        const prevCenter = pieceCenters[prevOriginalIndex];
+                        const currCenter = pieceCenters[originalIndex];
+                        distanceValue = Math.abs(currCenter - prevCenter);
+                        distanceLabel = 'From previous center';
+                    }
+
+                    // Height difference from center height
+                    const heightDiff = piece.nailHeight - piece.centerHeight;
+
+                    const positionHtml = isStacked
+                        ? `<div class="result-value" style="font-size: 1.2rem;">↕ ${piece.placement}</div>`
+                        : `<div class="result-value" style="font-size: 1.2rem;">${formatResult(distanceValue)}</div>`;
+
+                    quickInstallHtml += `
+                        <div class="result-item" style="margin-bottom: 8px;">
+                            <h3>Piece ${i + 1} (original #${piece.index})</h3>
+                            <div class="input-row" style="gap: 8px;">
+                                <div style="flex: 1;">
+                                    ${positionHtml}
+                                    <div class="note">${distanceLabel}</div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div class="result-value" style="font-size: 1.2rem;">${heightDiff >= 0 ? '+' : ''}${formatResult(heightDiff)}</div>
+                                    <div class="note">Hardware from center height</div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div class="result-value" style="font-size: 1.2rem;">${formatResult(piece.span)}</div>
+                                    <div class="note">Hardware span</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                quickInstallHtml += `</div>`;
+                container.innerHTML += quickInstallHtml;
+            }
         }
 
         // Store nail hitboxes for hover detection
@@ -1427,31 +1770,55 @@
             nailHitboxes = [];
 
             const centerHeight = pieces.length > 0 ? pieces[0].centerHeight : 60;
-            const totalPiecesWidth = pieces.reduce((sum, p) => sum + p.width, 0);
+
+            // Calculate how many "columns" of pieces there are (side-by-side count)
+            // Pieces placed above/below share a column with their reference piece
+            let columns = [];
+            let columnWidths = [];
+            pieces.forEach((p, i) => {
+                if (i === 0 || p.placement === 'side') {
+                    // New column
+                    columns.push([i]);
+                    columnWidths.push(p.width);
+                } else {
+                    // Add to previous column, update width if this piece is wider
+                    columns[columns.length - 1].push(i);
+                    columnWidths[columnWidths.length - 1] = Math.max(columnWidths[columnWidths.length - 1], p.width);
+                }
+            });
+
+            const totalColumnsWidth = columnWidths.reduce((sum, w) => sum + w, 0);
+            const numColumns = columns.length;
 
             // Calculate spacing based on mode
             let spacing = 0;
             let edgeSpacing = 0;
             let effectiveWallWidth;
 
-            if (pieces.length > 1) {
+            if (numColumns > 1) {
                 if (spacingMode === 'custom') {
                     const customSpacingValue = parseMixedNumber(document.getElementById('customSpacing').value);
                     spacing = isNaN(customSpacingValue) ? 12 : toInches(customSpacingValue);
-                    // Total width of pieces plus spacing between them
-                    const totalContentWidth = totalPiecesWidth + spacing * (pieces.length - 1);
+                    const totalContentWidth = totalColumnsWidth + spacing * (numColumns - 1);
                     effectiveWallWidth = wallWidthIn || Math.max(totalContentWidth + 40, 80);
-                    // Center the group: edge spacing is (wall - content) / 2
                     edgeSpacing = (effectiveWallWidth - totalContentWidth) / 2;
                 } else {
-                    effectiveWallWidth = wallWidthIn || Math.max(totalPiecesWidth + 60, 120);
-                    const availableSpace = effectiveWallWidth - totalPiecesWidth;
-                    spacing = availableSpace / (pieces.length + 1);
-                    edgeSpacing = spacing; // Edge spacing equals inter-piece spacing in even mode
+                    effectiveWallWidth = wallWidthIn || Math.max(totalColumnsWidth + 60, 120);
+                    const availableSpace = effectiveWallWidth - totalColumnsWidth;
+                    spacing = availableSpace / (numColumns + 1);
+                    edgeSpacing = spacing;
                 }
             } else {
-                effectiveWallWidth = wallWidthIn || Math.max(totalPiecesWidth + 40, 80);
-                edgeSpacing = (effectiveWallWidth - totalPiecesWidth) / 2;
+                effectiveWallWidth = wallWidthIn || Math.max(totalColumnsWidth + 40, 80);
+                edgeSpacing = (effectiveWallWidth - totalColumnsWidth) / 2;
+            }
+
+            // Pre-calculate column X positions
+            let columnXPositions = [];
+            let colX = edgeSpacing;
+            for (let c = 0; c < numColumns; c++) {
+                columnXPositions.push(colX);
+                colX += columnWidths[c] + spacing;
             }
 
             // Find highest piece top
@@ -1507,9 +1874,6 @@
             ctx.textAlign = 'center';
             ctx.fillText('FLOOR', canvasWidth / 2, canvasHeight - 8);
 
-            // Calculate starting X position (edgeSpacing centers content on wall)
-            let currentX = edgeSpacing * drawScale;
-
             // Draw center height reference line (dotted)
             const centerHeightY = canvasHeight - (centerHeight * drawScale);
             ctx.strokeStyle = '#999';
@@ -1527,13 +1891,25 @@
             ctx.textAlign = 'right';
             ctx.fillText(formatResult(centerHeight) + ' center', canvasWidth - 5, centerHeightY - 4);
 
+            // Track current column for drawing
+            let currentColumn = 0;
+
             // Draw pieces
             pieces.forEach((piece, i) => {
+                // Determine which column this piece is in
+                if (i > 0 && piece.placement === 'side') {
+                    currentColumn++;
+                }
+
                 const picWidth = piece.width * drawScale;
                 const picHeight = piece.height * drawScale;
                 const picBottom = canvasHeight - ((piece.centerHeight - piece.height / 2) * drawScale);
                 const picTop = picBottom - picHeight;
-                const picCenterX = currentX + picWidth / 2;
+
+                // Calculate X position: center in column
+                const columnX = columnXPositions[currentColumn] * drawScale;
+                const columnW = columnWidths[currentColumn] * drawScale;
+                const picCenterX = columnX + columnW / 2;
 
                 // Hardware position calculations
                 const nailY = canvasHeight - (piece.nailHeight * drawScale);
@@ -1544,10 +1920,11 @@
                 const xSize = 5;
 
                 if (viewMode === 'full') {
-                    // Frame
+                    // Frame - center piece in column
+                    const picLeftX = picCenterX - picWidth / 2;
                     ctx.strokeStyle = '#000';
                     ctx.lineWidth = 2;
-                    ctx.strokeRect(currentX, picTop, picWidth, picHeight);
+                    ctx.strokeRect(picLeftX, picTop, picWidth, picHeight);
 
                     // Dotted center line on each piece
                     ctx.strokeStyle = '#666';
@@ -1559,12 +1936,25 @@
                     ctx.stroke();
                     ctx.setLineDash([]);
 
-                    // Piece number
+                    // Piece number/name (based on install direction)
+                    const displayIndex = installDirection === 'rtl' ? pieces.length - i : i + 1;
                     ctx.fillStyle = '#000';
-                    ctx.font = 'bold 18px monospace';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.fillText(piece.index.toString(), picCenterX, picTop + picHeight / 2);
+
+                    if (piece.name) {
+                        // Show name and number
+                        ctx.font = 'bold 12px monospace';
+                        ctx.fillText(displayIndex.toString(), picCenterX, picTop + picHeight / 2 - 10);
+                        ctx.font = '10px monospace';
+                        // Truncate name if too long
+                        const maxNameLen = Math.floor(picWidth / 7);
+                        const displayName = piece.name.length > maxNameLen ? piece.name.substring(0, maxNameLen) + '...' : piece.name;
+                        ctx.fillText(displayName, picCenterX, picTop + picHeight / 2 + 8);
+                    } else {
+                        ctx.font = 'bold 18px monospace';
+                        ctx.fillText(displayIndex.toString(), picCenterX, picTop + picHeight / 2);
+                    }
                 }
 
                 // Draw hardware based on type
@@ -1775,15 +2165,15 @@
                 }
 
                 // Store positions for spacing indicators
-                piece.rightEdgeX = currentX + picWidth;
-                piece.leftEdgeX = currentX;
+                const picLeftX = picCenterX - picWidth / 2;
+                piece.rightEdgeX = picLeftX + picWidth;
+                piece.leftEdgeX = picLeftX;
+                piece.columnIndex = currentColumn;
                 piece.picTop = picTop;
                 piece.picBottom = picBottom;
                 piece.nail1X = nail1X;
                 piece.nail2X = nail2X;
                 piece.nailY = nailY;
-
-                currentX += picWidth + spacing * drawScale;
             });
 
             if (viewMode === 'full') {
