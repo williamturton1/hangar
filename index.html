@@ -62,7 +62,7 @@
 
         .logo {
             text-align: center;
-            margin-bottom: 12px;
+            margin-bottom: 0;
         }
 
         .logo-img {
@@ -753,7 +753,7 @@
             }
 
             .logo {
-                margin-bottom: 8px;
+                margin-bottom: 0;
             }
 
             .canvas-container {
@@ -1159,8 +1159,8 @@
             const canvasWidth = containerWidth;
             const canvasHeight = canvasWidth * aspectRatio;
 
-            // Set actual canvas resolution (2x for retina)
-            const dpr = window.devicePixelRatio || 1;
+            // Set actual canvas resolution (3x minimum for high quality)
+            const dpr = Math.max(window.devicePixelRatio || 1, 3);
             canvas.width = canvasWidth * dpr;
             canvas.height = canvasHeight * dpr;
             canvas.style.width = canvasWidth + 'px';
@@ -1192,9 +1192,9 @@
 
             // Floor label
             ctx.fillStyle = '#000';
-            ctx.font = 'bold 11px monospace';
+            ctx.font = 'bold 13px monospace';
             ctx.textAlign = 'center';
-            ctx.fillText('FLOOR', canvasWidth / 2, canvasHeight - 6);
+            ctx.fillText('FLOOR', canvasWidth / 2, canvasHeight - 8);
 
             // Calculate starting X position (edgeSpacing centers content on wall)
             let currentX = edgeSpacing * drawScale;
@@ -1212,9 +1212,9 @@
 
             // Center height label
             ctx.fillStyle = '#666';
-            ctx.font = '9px monospace';
+            ctx.font = '11px monospace';
             ctx.textAlign = 'right';
-            ctx.fillText(formatResult(centerHeight) + ' center', canvasWidth - 5, centerHeightY - 3);
+            ctx.fillText(formatResult(centerHeight) + ' center', canvasWidth - 5, centerHeightY - 4);
 
             // Draw pieces
             pieces.forEach((piece, i) => {
@@ -1229,8 +1229,8 @@
                 const nailOffset = (piece.span / 2) * drawScale;
                 const nail1X = picCenterX - nailOffset;
                 const nail2X = picCenterX + nailOffset;
-                const circleRadius = 8;
-                const xSize = 4;
+                const circleRadius = 10;
+                const xSize = 5;
 
                 if (viewMode === 'full') {
                     // Frame
@@ -1250,7 +1250,7 @@
 
                     // Piece number
                     ctx.fillStyle = '#000';
-                    ctx.font = 'bold 14px monospace';
+                    ctx.font = 'bold 18px monospace';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText(piece.index.toString(), picCenterX, picTop + picHeight / 2);
@@ -1258,8 +1258,8 @@
 
                 // Dotted line connecting nails
                 ctx.strokeStyle = '#f00';
-                ctx.lineWidth = 1;
-                ctx.setLineDash([3, 3]);
+                ctx.lineWidth = 2;
+                ctx.setLineDash([4, 4]);
                 ctx.beginPath();
                 ctx.moveTo(nail1X + circleRadius, nailY);
                 ctx.lineTo(nail2X - circleRadius, nailY);
@@ -1269,9 +1269,9 @@
                 // Span label between nails (shown by default now)
                 const spanLabelX = (nail1X + nail2X) / 2;
                 ctx.fillStyle = '#000';
-                ctx.fillRect(spanLabelX - 22, nailY - 18, 44, 12);
+                ctx.fillRect(spanLabelX - 26, nailY - 20, 52, 14);
                 ctx.fillStyle = '#0f0';
-                ctx.font = 'bold 9px monospace';
+                ctx.font = 'bold 11px monospace';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(formatResult(piece.span), spanLabelX, nailY - 12);
@@ -1310,9 +1310,9 @@
 
                 // Nail height label (left side)
                 ctx.fillStyle = '#000';
-                ctx.fillRect(2, nailY - 7, 50, 14);
+                ctx.fillRect(2, nailY - 8, 58, 16);
                 ctx.fillStyle = '#0f0';
-                ctx.font = 'bold 10px monospace';
+                ctx.font = 'bold 12px monospace';
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(formatResult(piece.nailHeight), 5, nailY);
@@ -1365,12 +1365,12 @@
 
                     // Left edge label
                     ctx.fillStyle = '#000';
-                    ctx.fillRect(firstPiece.leftEdgeX / 2 - 22, midY - 20, 44, 14);
+                    ctx.fillRect(firstPiece.leftEdgeX / 2 - 26, midY - 22, 52, 16);
                     ctx.fillStyle = '#0f0';
-                    ctx.font = 'bold 9px monospace';
+                    ctx.font = 'bold 11px monospace';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.fillText(formatResult(edgeSpacing), firstPiece.leftEdgeX / 2, midY - 13);
+                    ctx.fillText(formatResult(edgeSpacing), firstPiece.leftEdgeX / 2, midY - 14);
 
                     // Right edge spacing
                     ctx.strokeStyle = '#000';
@@ -1382,11 +1382,11 @@
                     // Right edge label - "repeat"
                     const rightEdgeMid = lastPiece.rightEdgeX + (canvasWidth - lastPiece.rightEdgeX) / 2;
                     ctx.fillStyle = '#000';
-                    ctx.fillRect(rightEdgeMid - 25, midY - 20, 50, 14);
+                    ctx.fillRect(rightEdgeMid - 28, midY - 22, 56, 16);
                     ctx.fillStyle = '#888';
-                    ctx.font = '8px monospace';
+                    ctx.font = '10px monospace';
                     ctx.textAlign = 'center';
-                    ctx.fillText('(repeat)', rightEdgeMid, midY - 13);
+                    ctx.fillText('(repeat)', rightEdgeMid, midY - 14);
                 }
 
                 // Draw spacing indicators between paintings
@@ -1413,12 +1413,12 @@
 
                         // Spacing label
                         ctx.fillStyle = '#000';
-                        ctx.fillRect(gapCenterX - 22, lineY - 20, 44, 14);
+                        ctx.fillRect(gapCenterX - 26, lineY - 22, 52, 16);
                         ctx.fillStyle = '#0f0';
-                        ctx.font = 'bold 9px monospace';
+                        ctx.font = 'bold 11px monospace';
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'middle';
-                        ctx.fillText(formatResult(spacing), gapCenterX, lineY - 13);
+                        ctx.fillText(formatResult(spacing), gapCenterX, lineY - 14);
                     }
                 }
             }
@@ -1465,12 +1465,12 @@
 
             // Wall center label at top
             ctx.fillStyle = '#000';
-            ctx.fillRect(wallCenterX - 22, 2, 44, 12);
+            ctx.fillRect(wallCenterX - 28, 2, 56, 14);
             ctx.fillStyle = '#fff';
-            ctx.font = '9px monospace';
+            ctx.font = 'bold 11px monospace';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText('CENTER', wallCenterX, 8);
+            ctx.fillText('CENTER', wallCenterX, 9);
 
             // Setup hover listener
             setupCanvasHover();
