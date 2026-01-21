@@ -863,6 +863,8 @@
             <button onclick="debugFill2()">2 pieces</button>
             <button onclick="debugFill3()">3 pieces</button>
             <button onclick="debugFillCustom()">custom spacing</button>
+            <button onclick="debugFillWire()">wire test</button>
+            <button onclick="debugFillCleat()">cleat test</button>
             <button onclick="debugFillRandom()">random</button>
         </div>
         <button class="debug-toggle" onclick="toggleDebug()" title="Debug">?</button>
@@ -1953,63 +1955,112 @@
             document.getElementById('debugMenu').classList.toggle('open');
         }
 
-        function fillPieceValues(pieceCard, width, height, span, fromTop) {
+        function fillPieceValues(pieceCard, width, height, hwValue, fromTop) {
             pieceCard.querySelector('[data-field="width"]').value = width;
             pieceCard.querySelector('[data-field="height"]').value = height;
-            pieceCard.querySelector('[data-field="span"]').value = span;
             pieceCard.querySelector('[data-field="fromTop"]').value = fromTop;
+
+            // Fill the hardware-specific field based on current hardware type
+            if (hardwareType === 'nails') {
+                const spanField = pieceCard.querySelector('[data-field="span"]');
+                if (spanField) spanField.value = hwValue;
+            } else if (hardwareType === 'wire') {
+                const wireField = pieceCard.querySelector('[data-field="wireLength"]');
+                if (wireField) wireField.value = hwValue;
+            } else if (hardwareType === 'cleat') {
+                const cleatField = pieceCard.querySelector('[data-field="cleatCount"]');
+                if (cleatField) cleatField.value = hwValue;
+            }
         }
 
         function debugFill1() {
             startOver();
-            document.getElementById('wallWidth').value = '120';
-            const pieceCards = document.querySelectorAll('.piece-card');
-            fillPieceValues(pieceCards[0], '24', '36', '16', '4');
-            document.getElementById('debugMenu').classList.remove('open');
-            calculate();
+            setHardwareType('nails');
+            setTimeout(() => {
+                document.getElementById('wallWidth').value = '120';
+                const pieceCards = document.querySelectorAll('.piece-card');
+                fillPieceValues(pieceCards[0], '24', '36', '16', '4');
+                document.getElementById('debugMenu').classList.remove('open');
+                calculate();
+            }, 50);
         }
 
         function debugFill2() {
             startOver();
-            document.getElementById('wallWidth').value = '144';
-            const pieceCards = document.querySelectorAll('.piece-card');
-            fillPieceValues(pieceCards[0], '24', '30', '14', '3');
-            addPiece();
+            setHardwareType('nails');
             setTimeout(() => {
-                const cards = document.querySelectorAll('.piece-card');
-                fillPieceValues(cards[1], '30', '40', '18', '5');
-                document.getElementById('debugMenu').classList.remove('open');
-                calculate();
+                document.getElementById('wallWidth').value = '144';
+                const pieceCards = document.querySelectorAll('.piece-card');
+                fillPieceValues(pieceCards[0], '24', '30', '14', '3');
+                addPiece();
+                setTimeout(() => {
+                    const cards = document.querySelectorAll('.piece-card');
+                    fillPieceValues(cards[1], '30', '40', '18', '5');
+                    document.getElementById('debugMenu').classList.remove('open');
+                    calculate();
+                }, 50);
             }, 50);
         }
 
         function debugFill3() {
             startOver();
-            document.getElementById('wallWidth').value = '180';
-            const pieceCards = document.querySelectorAll('.piece-card');
-            fillPieceValues(pieceCards[0], '20', '24', '12', '3');
-            addPiece();
-            addPiece();
+            setHardwareType('nails');
             setTimeout(() => {
-                const cards = document.querySelectorAll('.piece-card');
-                fillPieceValues(cards[1], '24', '36', '16', '4');
-                fillPieceValues(cards[2], '18', '24', '10', '2 1/2');
-                document.getElementById('debugMenu').classList.remove('open');
-                calculate();
+                document.getElementById('wallWidth').value = '180';
+                const pieceCards = document.querySelectorAll('.piece-card');
+                fillPieceValues(pieceCards[0], '20', '24', '12', '3');
+                addPiece();
+                addPiece();
+                setTimeout(() => {
+                    const cards = document.querySelectorAll('.piece-card');
+                    fillPieceValues(cards[1], '24', '36', '16', '4');
+                    fillPieceValues(cards[2], '18', '24', '10', '2 1/2');
+                    document.getElementById('debugMenu').classList.remove('open');
+                    calculate();
+                }, 50);
             }, 50);
         }
 
         function debugFillCustom() {
             startOver();
+            setHardwareType('nails');
             setSpacingMode('custom');
-            document.getElementById('customSpacing').value = '8';
-            document.getElementById('wallWidth').value = '96';
-            const pieceCards = document.querySelectorAll('.piece-card');
-            fillPieceValues(pieceCards[0], '16', '20', '10', '2');
-            addPiece();
             setTimeout(() => {
-                const cards = document.querySelectorAll('.piece-card');
-                fillPieceValues(cards[1], '16', '20', '10', '2');
+                document.getElementById('customSpacing').value = '8';
+                document.getElementById('wallWidth').value = '96';
+                const pieceCards = document.querySelectorAll('.piece-card');
+                fillPieceValues(pieceCards[0], '16', '20', '10', '2');
+                addPiece();
+                setTimeout(() => {
+                    const cards = document.querySelectorAll('.piece-card');
+                    fillPieceValues(cards[1], '16', '20', '10', '2');
+                    document.getElementById('debugMenu').classList.remove('open');
+                    calculate();
+                }, 50);
+            }, 50);
+        }
+
+        function debugFillWire() {
+            startOver();
+            setHardwareType('wire');
+            setTimeout(() => {
+                document.getElementById('wallWidth').value = '120';
+                const pieceCards = document.querySelectorAll('.piece-card');
+                // Wire length should be longer than 60% of width for sag to work
+                fillPieceValues(pieceCards[0], '24', '36', '18', '4');
+                document.getElementById('debugMenu').classList.remove('open');
+                calculate();
+            }, 50);
+        }
+
+        function debugFillCleat() {
+            startOver();
+            setHardwareType('cleat');
+            setTimeout(() => {
+                document.getElementById('wallWidth').value = '120';
+                const pieceCards = document.querySelectorAll('.piece-card');
+                // 3 cleats
+                fillPieceValues(pieceCards[0], '36', '24', '3', '2');
                 document.getElementById('debugMenu').classList.remove('open');
                 calculate();
             }, 50);
@@ -2017,41 +2068,58 @@
 
         function debugFillRandom() {
             startOver();
-            // Random wall width between 72" (6ft) and 240" (20ft)
-            const wallWidth = Math.floor(Math.random() * 168) + 72;
-            document.getElementById('wallWidth').value = wallWidth;
-            document.getElementById('centerHeight').value = '60'; // Keep 60" center
+            // Random hardware type
+            const hwTypes = ['nails', 'wire', 'cleat'];
+            const randomHw = hwTypes[Math.floor(Math.random() * hwTypes.length)];
+            setHardwareType(randomHw);
 
-            // Random number of pieces (1-4)
-            const numPieces = Math.floor(Math.random() * 4) + 1;
+            setTimeout(() => {
+                // Random wall width between 72" (6ft) and 240" (20ft)
+                const wallWidth = Math.floor(Math.random() * 168) + 72;
+                document.getElementById('wallWidth').value = wallWidth;
+                document.getElementById('centerHeight').value = '60';
 
-            function fillRandomPiece(card) {
-                const width = Math.floor(Math.random() * 30) + 12; // 12-42"
-                const height = Math.floor(Math.random() * 40) + 16; // 16-56"
-                const span = Math.floor(Math.random() * (width - 8)) + 6; // 6 to width-2
-                const fromTop = Math.floor(Math.random() * 6) + 2; // 2-8"
-                fillPieceValues(card, width, height, span, fromTop);
-            }
+                // Random number of pieces (1-4)
+                const numPieces = Math.floor(Math.random() * 4) + 1;
 
-            const firstCard = document.querySelectorAll('.piece-card')[0];
-            fillRandomPiece(firstCard);
+                function fillRandomPiece(card) {
+                    const width = Math.floor(Math.random() * 30) + 12; // 12-42"
+                    const height = Math.floor(Math.random() * 40) + 16; // 16-56"
+                    const fromTop = Math.floor(Math.random() * 6) + 2; // 2-8"
 
-            if (numPieces > 1) {
-                for (let i = 1; i < numPieces; i++) {
-                    addPiece();
-                }
-                setTimeout(() => {
-                    const cards = document.querySelectorAll('.piece-card');
-                    for (let i = 1; i < cards.length; i++) {
-                        fillRandomPiece(cards[i]);
+                    let hwValue;
+                    if (hardwareType === 'nails') {
+                        hwValue = Math.floor(Math.random() * (width - 8)) + 6; // span: 6 to width-2
+                    } else if (hardwareType === 'wire') {
+                        // Wire length must be > 60% of width for valid sag
+                        const minWire = Math.ceil(width * 0.6) + 2;
+                        hwValue = Math.floor(Math.random() * 10) + minWire;
+                    } else if (hardwareType === 'cleat') {
+                        hwValue = Math.floor(Math.random() * 4) + 1; // 1-4 cleats
                     }
+                    fillPieceValues(card, width, height, hwValue, fromTop);
+                }
+
+                const firstCard = document.querySelectorAll('.piece-card')[0];
+                fillRandomPiece(firstCard);
+
+                if (numPieces > 1) {
+                    for (let i = 1; i < numPieces; i++) {
+                        addPiece();
+                    }
+                    setTimeout(() => {
+                        const cards = document.querySelectorAll('.piece-card');
+                        for (let i = 1; i < cards.length; i++) {
+                            fillRandomPiece(cards[i]);
+                        }
+                        document.getElementById('debugMenu').classList.remove('open');
+                        calculate();
+                    }, 50);
+                } else {
                     document.getElementById('debugMenu').classList.remove('open');
                     calculate();
-                }, 50);
-            } else {
-                document.getElementById('debugMenu').classList.remove('open');
-                calculate();
-            }
+                }
+            }, 50);
         }
 
         function setViewMode(mode) {
