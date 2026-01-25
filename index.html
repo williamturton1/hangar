@@ -311,6 +311,82 @@
             margin-top: 6px;
         }
 
+        .hardware-suggestion {
+            background: #1a1a0a;
+            border: 1px solid #444;
+            padding: 12px;
+            margin-top: 12px;
+        }
+
+        .hardware-suggestion h4 {
+            color: #fc0;
+            font-size: 0.8rem;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .hardware-suggestion ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .hardware-suggestion li {
+            color: #ccc;
+            font-size: 0.85rem;
+            padding: 4px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .hardware-suggestion li:last-child {
+            border-bottom: none;
+        }
+
+        .hardware-suggestion .hw-name {
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .hardware-suggestion .hw-capacity {
+            color: #888;
+            font-size: 0.75rem;
+        }
+
+        .hardware-suggestion .hw-note {
+            color: #666;
+            font-size: 0.75rem;
+            font-style: italic;
+            margin-top: 8px;
+        }
+
+        body.light-mode .hardware-suggestion {
+            background: #fffde6;
+            border-color: #ccc;
+        }
+
+        body.light-mode .hardware-suggestion h4 {
+            color: #996600;
+        }
+
+        body.light-mode .hardware-suggestion li {
+            color: #333;
+            border-bottom-color: #ddd;
+        }
+
+        body.light-mode .hardware-suggestion .hw-name {
+            color: #000;
+        }
+
+        body.light-mode .hardware-suggestion .hw-capacity {
+            color: #666;
+        }
+
+        body.light-mode .hardware-suggestion .hw-note {
+            color: #888;
+        }
+
         .help-text {
             font-size: 0.75rem;
             color: #444;
@@ -1020,6 +1096,25 @@
             return parseFloat(str);
         }
 
+        function parseWeight(str) {
+            if (!str || str.trim() === '') return null;
+            str = str.trim().toLowerCase();
+            // Remove common weight suffixes like "lbs", "lb", "pounds", "oz", "ounces"
+            // Also handle "kg" and convert to lbs
+            const kgMatch = str.match(/^([\d.]+)\s*kg/);
+            if (kgMatch) {
+                return parseFloat(kgMatch[1]) * 2.205; // Convert kg to lbs
+            }
+            const ozMatch = str.match(/^([\d.]+)\s*(?:oz|ounces?)/);
+            if (ozMatch) {
+                return parseFloat(ozMatch[1]) / 16; // Convert oz to lbs
+            }
+            // Remove lbs/lb/pounds suffix
+            str = str.replace(/\s*(lbs?|pounds?)$/, '');
+            const weight = parseFloat(str);
+            return isNaN(weight) ? null : weight;
+        }
+
         function toMixedNumber(decimal) {
             if (isNaN(decimal)) return '--';
 
@@ -1179,6 +1274,11 @@
                         <label>Name <span class="optional-tag">(optional)</span></label>
                         <input type="text" data-piece="${pieceId}" data-field="name" placeholder="e.g., Starry Night">
                     </div>
+                    <div class="input-field" style="flex: 0 0 120px;">
+                        <label>Weight <span class="optional-tag">(optional)</span></label>
+                        <input type="text" data-piece="${pieceId}" data-field="weight" placeholder="e.g., 15 lbs">
+                        <p class="help-text">For hardware tips</p>
+                    </div>
                 </div>
                 ${placementHtml}
                 <div class="input-row">
@@ -1250,6 +1350,9 @@
                 const pieceId = card.id.replace('piece-', '');
                 const nameField = card.querySelector(`[data-field="name"]`);
                 const pieceName = nameField ? nameField.value.trim() : '';
+                const weightField = card.querySelector(`[data-field="weight"]`);
+                const weightVal = weightField ? weightField.value.trim() : '';
+                const pieceWeight = parseWeight(weightVal);
                 const width = parseMixedNumber(card.querySelector(`[data-field="width"]`).value);
                 const height = parseMixedNumber(card.querySelector(`[data-field="height"]`).value);
                 const fromTopField = card.querySelector(`[data-field="fromTop"]`);
@@ -1420,6 +1523,7 @@
                 pieces.push({
                     index: i + 1,
                     name: pieceName,
+                    weight: pieceWeight,
                     width: widthIn,
                     height: heightIn,
                     span: spanIn,
@@ -1505,6 +1609,64 @@
             }
 
             return true;
+        }
+
+        function getHardwareSuggestion(weightLbs) {
+            if (!weightLbs || weightLbs <= 0) {
+                return null;
+            }
+
+            const suggestions = [];
+            let note = '';
+
+            if (weightLbs <= 10) {
+                suggestions.push({ name: 'Small picture hooks', capacity: 'up to 10 lbs', best: true });
+                suggestions.push({ name: 'Adhesive strips (3M Command)', capacity: 'up to 8 lbs' });
+                suggestions.push({ name: 'Finish nails', capacity: 'up to 10 lbs' });
+                note = 'Lightweight piece - most basic hardware will work.';
+            } else if (weightLbs <= 25) {
+                suggestions.push({ name: 'Medium picture hooks', capacity: 'up to 25 lbs', best: true });
+                suggestions.push({ name: 'Sawtooth hangers', capacity: 'up to 20 lbs' });
+                suggestions.push({ name: 'D-rings with screws', capacity: 'up to 25 lbs' });
+                note = 'Use at least two hanging points for better stability.';
+            } else if (weightLbs <= 50) {
+                suggestions.push({ name: 'Heavy-duty picture hooks', capacity: 'up to 50 lbs', best: true });
+                suggestions.push({ name: 'Wall anchors + screws', capacity: '25-75 lbs' });
+                suggestions.push({ name: 'D-rings with wire', capacity: 'up to 50 lbs' });
+                note = 'Consider using two hooks or anchors for security.';
+            } else if (weightLbs <= 100) {
+                suggestions.push({ name: 'French cleat system', capacity: '50-200 lbs', best: true });
+                suggestions.push({ name: 'Toggle bolts', capacity: '50-100 lbs in drywall' });
+                suggestions.push({ name: 'Heavy-duty wall anchors', capacity: 'up to 75 lbs each' });
+                note = 'For heavy pieces, mount into wall studs if possible.';
+            } else {
+                suggestions.push({ name: 'French cleat (into studs)', capacity: '200+ lbs', best: true });
+                suggestions.push({ name: 'Z-bar mounting system', capacity: '100-300 lbs' });
+                suggestions.push({ name: 'Lag bolts into studs', capacity: '100+ lbs per bolt' });
+                note = 'Very heavy piece - MUST mount into wall studs, not just drywall.';
+            }
+
+            return { suggestions, note, weight: weightLbs };
+        }
+
+        function renderHardwareSuggestion(weightLbs) {
+            const recommendation = getHardwareSuggestion(weightLbs);
+            if (!recommendation) {
+                return '';
+            }
+
+            let listItems = recommendation.suggestions.map(s => {
+                const bestTag = s.best ? ' (recommended)' : '';
+                return `<li><span class="hw-name">${s.name}${bestTag}</span> <span class="hw-capacity">- ${s.capacity}</span></li>`;
+            }).join('');
+
+            return `
+                <div class="hardware-suggestion">
+                    <h4>Suggested Hardware for ${recommendation.weight} lbs</h4>
+                    <ul>${listItems}</ul>
+                    <div class="hw-note">${recommendation.note}</div>
+                </div>
+            `;
         }
 
         function renderResults() {
@@ -1620,6 +1782,13 @@
                             </div>
                         </div>
                     `;
+                }
+
+                // Add hardware suggestion if weight was provided
+                if (piece.weight) {
+                    const suggestionHtml = renderHardwareSuggestion(piece.weight);
+                    // Insert suggestion before the closing piece-card div
+                    html = html.replace(/<\/div>\s*$/, suggestionHtml + '</div>');
                 }
 
                 container.innerHTML += html;
@@ -2384,10 +2553,14 @@
             document.getElementById('debugMenu').classList.toggle('open');
         }
 
-        function fillPieceValues(pieceCard, width, height, hwValue, fromTop) {
+        function fillPieceValues(pieceCard, width, height, hwValue, fromTop, weight) {
             pieceCard.querySelector('[data-field="width"]').value = width;
             pieceCard.querySelector('[data-field="height"]').value = height;
             pieceCard.querySelector('[data-field="fromTop"]').value = fromTop;
+            if (weight) {
+                const weightField = pieceCard.querySelector('[data-field="weight"]');
+                if (weightField) weightField.value = weight;
+            }
 
             // Fill the hardware-specific field based on current hardware type
             if (hardwareType === 'nails') {
@@ -2408,7 +2581,7 @@
             setTimeout(() => {
                 document.getElementById('wallWidth').value = '120';
                 const pieceCards = document.querySelectorAll('.piece-card');
-                fillPieceValues(pieceCards[0], '24', '36', '16', '4');
+                fillPieceValues(pieceCards[0], '24', '36', '16', '4', '25');
                 document.getElementById('debugMenu').classList.remove('open');
                 calculate();
             }, 50);
